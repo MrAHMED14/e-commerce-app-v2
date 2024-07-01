@@ -1,7 +1,13 @@
-export default function Home() {
+import Orders from "@/components/Orders"
+import Products from "@/components/Products"
+import User from "@/components/User"
+
+export default async function Home() {
   return (
-    <div>
-      <h1 className="text-4xl">Hi</h1>
+    <div className="">
+      <h1 className="text-3xl font-bold">Welcome</h1>
+      <User />
+      <Products />
     </div>
   )
 }

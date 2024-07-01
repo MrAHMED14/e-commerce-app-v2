@@ -21,6 +21,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={cn("dark min-h-screen flex flex-col", inter.className)}
       >
+        <h1 className="text-xs text-muted font-bold">Test layout</h1>
         <main>{children}</main>
       </body>
     </html>

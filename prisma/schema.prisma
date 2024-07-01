@@ -1,14 +1,75 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id
+  firstName String
+  lastName  String
+  email     String   @unique
+  avatar    String?
+  createdAt DateTime @default(now())
+
+  orders Order[]
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  isCompleted Boolean  @default(false)
+  userId      String
+  orderDate   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+
+  items OrderItem[]
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([orderId, productId])
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Product {
+  id            String      @id @default(uuid())
+  title         String
+  description   String?
+  price         Float
+  img           String[]
+  createdAt     DateTime    @default(now())
+  subcategoryId String
+  subcategory   Subcategory @relation(fields: [subcategoryId], references: [id])
+  items         OrderItem[]
+
+  @@index([subcategoryId])
+}
+
+model Subcategory {
+  id             String       @id @default(uuid())
+  name           String
+  mainCategoryId String
+  mainCategory   MainCategory @relation(fields: [mainCategoryId], references: [id])
+  products       Product[]
+
+  @@index([mainCategoryId])
+}
+
+model MainCategory {
+  id            String        @id @default(uuid())
+  name          String
+  subcategories Subcategory[]
 }
