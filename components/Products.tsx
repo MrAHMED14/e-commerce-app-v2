@@ -1,20 +1,30 @@
-import { getAllProducts } from "@/lib/action"
-import { Span } from "next/dist/trace"
+import { getAllProducts2, ProductFilterValues } from "@/lib/action"
+import ProCard from "./ProCard"
+import Filtre from "./filter"
 
-const Products = async () => {
-  const products = await getAllProducts()
-  //console.log(products)
+const Products = async ({
+  filter,
+}: {
+  filter?: ProductFilterValues | undefined
+}) => {
+  const products = await getAllProducts2(filter ? filter : {})
+
   return (
-    <div className="mt-10">
-      <h1 className="text-xl font-bold text-rose-500">Products</h1>
-      <ul className="pl-5">
-        {products?.map((product) => (
-          <li key={product.id}>
-            {product.title}{" "}
-            <span className="text-xs text-rose-300">{product.price} $</span>
-          </li>
-        ))}
-      </ul>
+    <div className="w-full flex flex-col">
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 min-[960px]:grid-cols-3 min-[1250px]:grid-cols-4 place-items-center">
+        {products && (
+          <>
+            {products.map((product) => (
+              <ProCard key={product.id} product={product} />
+            ))}
+          </>
+        )}
+        {!products.length && (
+          <>
+            <h1>Nothing to show</h1>
+          </>
+        )}
+      </div>
     </div>
   )
 }

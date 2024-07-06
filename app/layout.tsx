@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
+import SearchInput from "@/components/SearchInput"
+import Navbar from "@/components/Navbar"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,7 +23,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={cn("dark min-h-screen flex flex-col", inter.className)}
       >
-        <h1 className="text-xs text-muted font-bold">Test layout</h1>
+        <Navbar />
         <main>{children}</main>
       </body>
     </html>

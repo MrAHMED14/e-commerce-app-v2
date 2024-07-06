@@ -1,7 +1,7 @@
 "use server"
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server"
+import { Prisma, Product } from "@prisma/client"
+import { revalidatePath } from "next/cache"
 import prisma from "./db"
-import { NextResponse } from "next/server"
 
 interface OrderItem {
   productId: string
@@ -12,42 +12,7 @@ interface OrderRequest {
   userId: string
   order: OrderItem[]
 }
-/*
-export async function createUser() {
-  try {
-    const { getUser } = getKindeServerSession()
-    const user = await getUser()
 
-    if (!user || user === null || !user.id) {
-      return
-    }
-
-    let dbUser = await prisma.user.findUnique({
-      where: {
-        id: user.id,
-      },
-    })
-
-    if (!dbUser) {
-      dbUser = await prisma.user.create({
-        data: {
-          id: user.id,
-          firstName: user.given_name as string,
-          lastName: user.family_name as string,
-          email: user.email as string,
-          avatar: user.picture ?? `https://avatar.vercel.sh/${user.given_name}`,
-        },
-      })
-    }
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 200 }
-    )
-  } catch (error) {
-    console.error(error, "\nError creating usr...")
-  }
-}
-*/
 export async function createOrder(orderRequest: OrderRequest) {
   try {
     const { userId, order } = orderRequest
@@ -89,11 +54,23 @@ export async function createOrder(orderRequest: OrderRequest) {
   }
 }
 
-export async function getAllProducts() {
+export async function getAllProducts(query: string | undefined) {
   try {
-    const product = await prisma.product.findMany()
+    if (query && query.length > 1) {
+      const products: Product[] | undefined = await prisma.$queryRaw`
+            SELECT * FROM "Product"
+            WHERE to_tsvector('english', title || ' ' || description) @@ plainto_tsquery('english', ${query})
+          `
+      //console.log(products)
 
-    return product
+      revalidatePath("/shop")
+      return products
+    }
+
+    const products = await prisma.product.findMany()
+    revalidatePath("/")
+
+    return products
   } catch (error) {
     console.error(error, "\nError geting all products...")
   }
@@ -111,8 +88,144 @@ export async function getAllOrders() {
         },
       },
     })
+    revalidatePath("/ordres")
     return orders
   } catch (error) {
     console.error(error, "\nError geting all orders...")
   }
+}
+
+//Improve it
+export async function filtrBy() {
+  try {
+    const categoryFltr = "" as string
+    const subCategoryFltr = "" as string
+    const priceFltr = {
+      gte: undefined,
+      lte: undefined,
+    }
+
+    const products = await prisma.product.findMany({
+      where: {
+        AND: [
+          categoryFltr && categoryFltr.length > 0
+            ? {
+                subcategory: {
+                  mainCategory: {
+                    name: categoryFltr,
+                  },
+                },
+              }
+            : {},
+          subCategoryFltr && subCategoryFltr.length > 0
+            ? {
+                subcategory: {
+                  name: subCategoryFltr,
+                },
+              }
+            : {},
+
+          {
+            price: priceFltr,
+          },
+        ],
+      },
+    })
+    return products
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+export interface ProductFilterValues {
+  query?: string | undefined
+  category?: string | undefined
+  subCategory?: string | undefined
+  price?:
+    | {
+        gte?: number | undefined
+        lte?: number | undefined
+      }
+    | undefined
+  selectedOrder?:
+    | {
+        name: string
+        value: Prisma.SortOrder
+      }
+    | undefined
+}
+
+export async function getAllCategory() {
+  try {
+    const category = await prisma.mainCategory.findMany({})
+
+    return category
+  } catch (error) {
+    console.error(error)
+  }
+}
+export async function getAllSubCategory(category?: string | undefined) {
+  try {
+    const where: Prisma.SubcategoryWhereInput | undefined = category
+      ? {
+          mainCategory: { name: category },
+        }
+      : {}
+    const subCategory = await prisma.subcategory.findMany({ where })
+
+    return subCategory
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+export async function getAllProducts2(filterValues: ProductFilterValues) {
+  const { query, category, subCategory, selectedOrder, price } = filterValues
+  //Problem price: min > max
+
+  const searchString = query
+    ?.split(" ")
+    .filter((word) => word.length > 0)
+    .join(" & ")
+
+  const searchFilter: Prisma.ProductWhereInput = searchString
+    ? {
+        OR: [
+          { title: { search: searchString } },
+          { description: { search: searchString } },
+          { subcategory: { name: { search: searchString } } },
+          { subcategory: { mainCategory: { name: { search: searchString } } } },
+        ],
+      }
+    : {}
+
+  const where: Prisma.ProductWhereInput = {
+    AND: [
+      searchFilter,
+
+      subCategory && subCategory.length > 0
+        ? { subcategory: { name: subCategory } }
+        : {},
+
+      category && category.length > 0
+        ? { subcategory: { mainCategory: { name: category } } }
+        : {},
+
+      price ? { price } : {},
+    ],
+  }
+
+  let orderBy:
+    | Prisma.ProductOrderByWithRelationInput
+    | Prisma.ProductOrderByWithRelationInput[]
+    | undefined = {}
+  if (selectedOrder?.name === "price") {
+    orderBy = { price: selectedOrder.value }
+  }
+
+  const products = await prisma.product.findMany({
+    where,
+    orderBy,
+  })
+  return products
 }
