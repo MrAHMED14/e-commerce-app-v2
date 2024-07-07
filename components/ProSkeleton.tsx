@@ -1,4 +1,4 @@
-const ProSkeleton = () => {
+const Skeleton = () => {
   return (
     <div className="flex flex-col items-start animate-pulse">
       <div className="h-[230px] p-6 w-full">
@@ -17,4 +17,4 @@ const ProSkeleton = () => {
   )
 }
 
-export default ProSkeleton
+export default Skeleton

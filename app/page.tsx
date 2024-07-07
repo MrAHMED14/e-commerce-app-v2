@@ -1,4 +1,4 @@
-import Progress from "@/components/Progress"
+import Progress from "@/components/ProgressList"
 import User from "@/components/User"
 import { getAllProducts2 } from "@/lib/action"
 import Link from "next/link"

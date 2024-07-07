@@ -1,4 +1,4 @@
-import ProSkeleton from "@/components/ProSkeleton"
+import Skeleton from "@/components/ProSkeleton"
 
 export default function Loading() {
   return (
@@ -8,7 +8,7 @@ export default function Loading() {
           {Array(16)
             .fill(16)
             .map((_, index) => (
-              <ProSkeleton key={index} />
+              <Skeleton key={index} />
             ))}
         </div>
       </div>

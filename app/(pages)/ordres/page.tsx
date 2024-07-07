@@ -1,4 +1,4 @@
-import Orders from "@/components/Orders"
+import Orders from "@/components/OrdersList"
 import Link from "next/link"
 export const dynamic = "force-dynamic"
 export default function OrdersPage() {

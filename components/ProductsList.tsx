@@ -1,6 +1,6 @@
 import { getAllProducts2, ProductFilterValues } from "@/lib/action"
 import ProCard from "./ProCard"
-import Filtre from "./Filter"
+import Filtre from "./FilterOptions"
 
 const Products = async ({
   filter,

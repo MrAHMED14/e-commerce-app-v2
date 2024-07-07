@@ -1,5 +1,5 @@
-import Products from "@/components/Products"
-import Filtre from "@/components/Filter"
+import Products from "@/components/ProductsList"
+import Filtre from "@/components/FilterOptions"
 import { ProductFilterValues } from "@/lib/action"
 import { Prisma } from "@prisma/client"
 import { Suspense } from "react"
