@@ -12,7 +12,7 @@ const User = async () => {
 
   return (
     <div className="mt-10">
-      <h1 className="text-xl font-bold text-rose-500">User</h1>
+      <h1 className="text-2xl font-bold dark:text-rose-500">User</h1>
       {!user ? (
         <div className="flex gap-3">
           <LoginLink>
@@ -27,7 +27,7 @@ const User = async () => {
           <h1>
             Current user: {user.given_name} {user.family_name}
           </h1>
-          <img src={user.picture as string} alt="usr" className="rounded" />
+          {/* <img src={user.picture as string} alt="usr" className="rounded" /> */}
           <div className="">
             <LogoutLink>
               <Button className="font-bold">LogOut</Button>

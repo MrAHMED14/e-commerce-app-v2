@@ -1,5 +1,5 @@
 "use server"
-import { Prisma, Product } from "@prisma/client"
+import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import prisma from "./db"
 
@@ -11,6 +11,24 @@ interface OrderItem {
 interface OrderRequest {
   userId: string
   order: OrderItem[]
+}
+
+export interface ProductFilterValues {
+  query?: string | undefined
+  category?: string | undefined
+  subCategory?: string | undefined
+  price?:
+    | {
+        gte?: number | undefined
+        lte?: number | undefined
+      }
+    | undefined
+  selectedOrder?:
+    | {
+        name: string
+        value: Prisma.SortOrder
+      }
+    | undefined
 }
 
 export async function createOrder(orderRequest: OrderRequest) {
@@ -54,28 +72,6 @@ export async function createOrder(orderRequest: OrderRequest) {
   }
 }
 
-export async function getAllProducts(query: string | undefined) {
-  try {
-    if (query && query.length > 1) {
-      const products: Product[] | undefined = await prisma.$queryRaw`
-            SELECT * FROM "Product"
-            WHERE to_tsvector('english', title || ' ' || description) @@ plainto_tsquery('english', ${query})
-          `
-      //console.log(products)
-
-      revalidatePath("/shop")
-      return products
-    }
-
-    const products = await prisma.product.findMany()
-    revalidatePath("/")
-
-    return products
-  } catch (error) {
-    console.error(error, "\nError geting all products...")
-  }
-}
-
 export async function getAllOrders() {
   try {
     const orders = await prisma.order.findMany({
@@ -93,66 +89,6 @@ export async function getAllOrders() {
   } catch (error) {
     console.error(error, "\nError geting all orders...")
   }
-}
-
-//Improve it
-export async function filtrBy() {
-  try {
-    const categoryFltr = "" as string
-    const subCategoryFltr = "" as string
-    const priceFltr = {
-      gte: undefined,
-      lte: undefined,
-    }
-
-    const products = await prisma.product.findMany({
-      where: {
-        AND: [
-          categoryFltr && categoryFltr.length > 0
-            ? {
-                subcategory: {
-                  mainCategory: {
-                    name: categoryFltr,
-                  },
-                },
-              }
-            : {},
-          subCategoryFltr && subCategoryFltr.length > 0
-            ? {
-                subcategory: {
-                  name: subCategoryFltr,
-                },
-              }
-            : {},
-
-          {
-            price: priceFltr,
-          },
-        ],
-      },
-    })
-    return products
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-export interface ProductFilterValues {
-  query?: string | undefined
-  category?: string | undefined
-  subCategory?: string | undefined
-  price?:
-    | {
-        gte?: number | undefined
-        lte?: number | undefined
-      }
-    | undefined
-  selectedOrder?:
-    | {
-        name: string
-        value: Prisma.SortOrder
-      }
-    | undefined
 }
 
 export async function getAllCategory() {
@@ -184,7 +120,10 @@ export async function getAllProducts2(filterValues: ProductFilterValues) {
   //Problem price: min > max
 
   const searchString = query
-    ?.split(" ")
+    ?.replace(/&/g, "")
+    .replace(/\|/g, "")
+    .replace(/'/g, "")
+    .split(" ")
     .filter((word) => word.length > 0)
     .join(" & ")
 

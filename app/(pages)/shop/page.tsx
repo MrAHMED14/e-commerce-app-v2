@@ -1,10 +1,12 @@
-import ProSkeleton from "@/components/ProSkeleton"
 import Products from "@/components/Products"
+import Filtre from "@/components/Filter"
 import { ProductFilterValues } from "@/lib/action"
 import { Prisma } from "@prisma/client"
 import { Suspense } from "react"
-import Loading from "../../../components/loading"
-import Filtre from "@/components/filter"
+import Loading from "../../../components/LoadingPro"
+import Link from "next/link"
+
+export const dynamic = "force-dynamic"
 
 export default async function ShopPage({
   searchParams,
@@ -49,15 +51,18 @@ export default async function ShopPage({
   }
   return (
     <>
-      <div className="mt-10">
-        <h1 className="sm:container text-xl font-bold text-rose-500 mb-2">
-          Products
-        </h1>
-        <div className="sm:container sm:mx-auto mx-4 flex gap-x-2 justify-center">
+      <div className="sm:container sm:mx-auto mt-10">
+        <Link href={"/"} className="hover:underline dark:text-rose-200">
+          {"< Home"}
+        </Link>
+        <h1 className="text-2xl font-bold dark:text-rose-500 mb-2">Products</h1>
+        <div className="mx-4 flex gap-x-2 justify-center">
           <div className="w-[240px] hidden lg:block">
             <div className="border sticky top-1 w-full flex-col p-4 rounded-md">
               <h1 className="font-bold text-lg">Filters</h1>
-              <Filtre />
+              <Suspense>
+                <Filtre />
+              </Suspense>
             </div>
           </div>
           <Suspense

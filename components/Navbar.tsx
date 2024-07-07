@@ -1,9 +1,12 @@
+import { Suspense } from "react"
 import SearchInput from "./SearchInput"
 
 const Navbar = () => {
   return (
     <div className="w-full flex items-center justify-center">
-      <SearchInput />
+      <Suspense>
+        <SearchInput />
+      </Suspense>
     </div>
   )
 }

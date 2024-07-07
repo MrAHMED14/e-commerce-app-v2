@@ -1,6 +1,6 @@
 import { getAllProducts2, ProductFilterValues } from "@/lib/action"
 import ProCard from "./ProCard"
-import Filtre from "./filter"
+import Filtre from "./Filter"
 
 const Products = async ({
   filter,
@@ -19,12 +19,14 @@ const Products = async ({
             ))}
           </>
         )}
-        {!products.length && (
-          <>
-            <h1>Nothing to show</h1>
-          </>
-        )}
       </div>
+      {!products.length && (
+        <div className="w-full h-[calc(100vh-150px)] flex items-center justify-center">
+          <h1 className="text-4xl font-bold text-center mb-14 dark:text-muted text-stone-950/50">
+            Nothing to show
+          </h1>
+        </div>
+      )}
     </div>
   )
 }

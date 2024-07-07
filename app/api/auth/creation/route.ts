@@ -7,7 +7,7 @@ export async function GET() {
   const user = await getUser()
 
   if (!user || user === null || !user.id) {
-    throw new Error("Something went wrong...")
+    return NextResponse.json({ message: "No user login" })
   }
 
   let dbUser = await prisma.user.findUnique({
