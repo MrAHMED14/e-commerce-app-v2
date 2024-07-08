@@ -58,7 +58,7 @@ const SearchInput = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="m-1 w-1/2 items-center justify-center flex gap-2"
+        className="m-1 w-full items-center justify-center flex gap-2"
       >
         <FormField
           control={form.control}

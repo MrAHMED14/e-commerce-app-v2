@@ -1,5 +1,5 @@
 const ITMES = [
-  { title: "Dark & light theme toggle", status: false },
+  { title: "Dark & light theme toggle", status: true },
   { title: "Designing database schema", status: true },
   { title: "Integration of Prisma, Supabase", status: true },
   {
@@ -19,6 +19,8 @@ const ITMES = [
       "Fully functional sorting (By: Price low to high / high to low, Newest)",
     status: false,
   },
+  { title: "Single page product", status: false },
+  { title: "Fully functional cart component", status: false },
   { title: "Way to make an order", status: false },
   {
     title: "Way to create new product with img cloud service integration",
