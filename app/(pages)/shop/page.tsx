@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client"
 import { Suspense } from "react"
 import Loading from "../../../components/LoadingPro"
 import Link from "next/link"
+import SortOptions from "@/components/SortOptions"
 
 export const dynamic = "force-dynamic"
 
@@ -32,14 +33,20 @@ export default async function ShopPage({
   const max =
     typeof searchParams.max === "string" ? searchParams.max : undefined
 
+  const sort =
+    typeof searchParams.sort === "string" ? searchParams.sort : undefined
+
   const price = {
     gte: min ? parseInt(min) : undefined,
     lte: max ? parseInt(max) : undefined,
   }
 
   const selectedOrder = {
-    name: "",
-    value: "desc" as Prisma.SortOrder,
+    name: typeof sort === "string" ? sort.split("-")[0] : undefined,
+    value:
+      typeof sort === "string"
+        ? (sort.split("-")[1] as Prisma.SortOrder)
+        : undefined,
   }
 
   const filter: ProductFilterValues = {
@@ -55,7 +62,14 @@ export default async function ShopPage({
         <Link href={"/"} className="hover:underline dark:text-rose-200">
           {"< Home"}
         </Link>
-        <h1 className="text-2xl font-bold dark:text-rose-500 mb-2">Products</h1>
+        <div className="w-full flex items-center justify-between">
+          <h1 className="text-2xl font-bold dark:text-rose-500 mb-2">
+            Products
+          </h1>
+          <Suspense>
+            <SortOptions />
+          </Suspense>
+        </div>
         <div className="mx-4 flex gap-x-2 justify-center">
           <div className="w-[240px] hidden lg:block">
             <div className="border sticky top-1 w-full flex-col p-4 rounded-md">
@@ -66,7 +80,7 @@ export default async function ShopPage({
             </div>
           </div>
           <Suspense
-            key={subCategory || category || search}
+            key={subCategory || category || search || sort || min || max}
             fallback={<Loading />}
           >
             <Products filter={filter} />

@@ -25,8 +25,8 @@ export interface ProductFilterValues {
     | undefined
   selectedOrder?:
     | {
-        name: string
-        value: Prisma.SortOrder
+        name: string | undefined
+        value: Prisma.SortOrder | undefined
       }
     | undefined
 }

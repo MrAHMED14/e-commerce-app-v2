@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useTransition } from "react"
 import { Input } from "./ui/input"
 import Select from "./ui/select"
+import { Button } from "./ui/button"
 
 const categories = [
   { name: "Electronics" },
@@ -22,6 +23,8 @@ const subCategories = [
 export default function Filtre() {
   const router = useRouter()
   const searchParams = useSearchParams()!
+
+  console.log(searchParams)
 
   const [isCatPending, startCatTransition] = useTransition()
   const [isSubCatPending, startSubCatTransition] = useTransition()
@@ -140,15 +143,19 @@ export default function Filtre() {
               placeholder="min"
               type="number"
               onChange={(e) => {
-                console.log("min: ", e.currentTarget.value)
-                startMinTransition(() => {
-                  router.push(
-                    `/shop?${createQueryString("min", e.currentTarget.value)}`,
-                    {
-                      scroll: false,
-                    }
-                  )
-                })
+                ;(parseInt(e.currentTarget.value) >= 0 ||
+                  e.currentTarget.value === "") &&
+                  startMinTransition(() => {
+                    router.push(
+                      `/shop?${createQueryString(
+                        "min",
+                        e.currentTarget.value
+                      )}`,
+                      {
+                        scroll: false,
+                      }
+                    )
+                  })
               }}
             />
 
@@ -158,19 +165,41 @@ export default function Filtre() {
               className="appearance-none"
               placeholder="max"
               onChange={(e) => {
-                console.log("max: ", e.currentTarget.value)
-                startMaxTransition(() => {
-                  router.push(
-                    `/shop?${createQueryString("max", e.currentTarget.value)}`,
-                    {
-                      scroll: false,
-                    }
-                  )
-                })
+                ;(parseInt(e.currentTarget.value) >= 0 ||
+                  e.currentTarget.value === "") &&
+                  startMaxTransition(() => {
+                    router.push(
+                      `/shop?${createQueryString(
+                        "max",
+                        e.currentTarget.value
+                      )}`,
+                      {
+                        scroll: false,
+                      }
+                    )
+                  })
               }}
             />
           </div>
         </div>
+
+        {/* <div className="">
+          <Button
+            className="w-full mt-2 font-semibold"
+            onClick={() => {
+              router.push(
+                `/shop?${
+                  searchParams.get("search")
+                    ? "search=" + searchParams.get("search")
+                    : ""
+                }`
+              )
+              router.refresh()
+            }}
+          >
+            Rest
+          </Button>
+        </div> */}
       </div>
     </>
   )
