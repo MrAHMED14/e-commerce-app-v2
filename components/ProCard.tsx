@@ -1,8 +1,12 @@
 import { Product } from "@prisma/client"
+import Link from "next/link"
 
 const ProCard = ({ product }: { product: Product }) => {
   return (
-    <div className="cursor-pointer sm:hover:scale-90 sm:duration-500 scale-[.85] relative bg-slate-50 rounded-lg w-72 shadow-lg border">
+    <Link
+      href={`/shop/${product.id}`}
+      className="cursor-pointer sm:hover:scale-90 sm:duration-500 scale-[.85] relative bg-slate-50 rounded-lg w-72 shadow-lg border"
+    >
       <div className="relative pt-5 px-3 flex items-center justify-center">
         <div className="w-52 h-48 bg-gray-300/80 rounded-lg animate-pulse" />
       </div>
@@ -22,7 +26,7 @@ const ProCard = ({ product }: { product: Product }) => {
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
 

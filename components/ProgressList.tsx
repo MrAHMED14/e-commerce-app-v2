@@ -18,7 +18,7 @@ const ITMES = [
     title: "Fully functional sorting (By: Price low to high / high to low)",
     status: true,
   },
-  { title: "Single page product", status: false },
+  { title: "Single page product", status: true },
   { title: "Fully functional cart component", status: false },
   { title: "Way to make an order", status: false },
   {

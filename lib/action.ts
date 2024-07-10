@@ -100,6 +100,7 @@ export async function getAllCategory() {
     console.error(error)
   }
 }
+
 export async function getAllSubCategory(category?: string | undefined) {
   try {
     const where: Prisma.SubcategoryWhereInput | undefined = category
@@ -110,6 +111,31 @@ export async function getAllSubCategory(category?: string | undefined) {
     const subCategory = await prisma.subcategory.findMany({ where })
 
     return subCategory
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+export async function getProductById(id: string) {
+  try {
+    const productById = await prisma.product.findUnique({ where: { id } })
+
+    return productById
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+export async function getProCatAndSubCatById(id: string) {
+  try {
+    const categoryById = await prisma.subcategory.findUnique({
+      where: { id },
+      include: { mainCategory: true },
+    })
+
+    console.log(categoryById)
+
+    return categoryById
   } catch (error) {
     console.error(error)
   }
