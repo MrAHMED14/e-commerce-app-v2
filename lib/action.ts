@@ -133,8 +133,6 @@ export async function getProCatAndSubCatById(id: string) {
       include: { mainCategory: true },
     })
 
-    console.log(categoryById)
-
     return categoryById
   } catch (error) {
     console.error(error)

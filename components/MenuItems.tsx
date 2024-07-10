@@ -1,4 +1,4 @@
-import { Box, Home, ShoppingBag } from "lucide-react"
+import { Box, Home, ShoppingBag, ShoppingBasket } from "lucide-react"
 import Link from "next/link"
 
 export default function MenuItems() {
@@ -15,6 +15,12 @@ export default function MenuItems() {
           <ShoppingBag size={18} />
           <Link href={"/shop"} className="hover:underline">
             Shop
+          </Link>
+        </li>
+        <li className="flex items-center gap-1">
+          <ShoppingBasket size={18} />
+          <Link href={"/shop/cart"} className="hover:underline">
+            Cart
           </Link>
         </li>
         <li className="flex items-center gap-1">

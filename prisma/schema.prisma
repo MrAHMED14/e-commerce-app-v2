@@ -18,14 +18,16 @@ model User {
   createdAt DateTime @default(now())
 
   orders Order[]
+  carts  Cart[]
 }
 
 model Order {
   id          String   @id @default(uuid())
   isCompleted Boolean  @default(false)
-  userId      String
   orderDate   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
   items OrderItem[]
 
@@ -33,11 +35,13 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(uuid())
-  orderId   String
+  id       String @id @default(uuid())
+  quantity Int
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id])
+
   productId String
-  quantity  Int
-  order     Order   @relation(fields: [orderId], references: [id])
   product   Product @relation(fields: [productId], references: [id])
 
   @@unique([orderId, productId])
@@ -45,26 +49,57 @@ model OrderItem {
   @@index([productId])
 }
 
+model Cart {
+  id    String     @id @default(uuid())
+  items CartItem[]
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CartItem {
+  id       String @id @default(uuid())
+  quantity Int
+
+  cartId String
+  cart   Cart   @relation(fields: [cartId], references: [id])
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+  @@index([productId])
+}
+
 model Product {
-  id            String      @id @default(uuid())
-  title         String
-  description   String?
-  price         Float
-  img           String[]
-  createdAt     DateTime    @default(now())
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  price       Float
+  img         String[]
+  createdAt   DateTime @default(now())
+
   subcategoryId String
   subcategory   Subcategory @relation(fields: [subcategoryId], references: [id])
-  items         OrderItem[]
+
+  cartItems  CartItem[]
+  orderItems OrderItem[]
 
   @@index([subcategoryId])
 }
 
 model Subcategory {
-  id             String       @id @default(uuid())
-  name           String
+  id   String @id @default(uuid())
+  name String
+
   mainCategoryId String
   mainCategory   MainCategory @relation(fields: [mainCategoryId], references: [id])
-  products       Product[]
+
+  products Product[]
 
   @@index([mainCategoryId])
 }
