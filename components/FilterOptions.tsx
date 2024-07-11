@@ -24,8 +24,6 @@ export default function Filtre() {
   const router = useRouter()
   const searchParams = useSearchParams()!
 
-  console.log(searchParams)
-
   const [isCatPending, startCatTransition] = useTransition()
   const [isSubCatPending, startSubCatTransition] = useTransition()
   const [isAvailPending, startAvailTransition] = useTransition()

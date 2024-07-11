@@ -1,3 +1,4 @@
+import { mergeAnonymousCartIntoUserCart } from "@/lib/cart"
 import prisma from "@/lib/db"
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server"
 import { NextResponse } from "next/server"
@@ -27,5 +28,8 @@ export async function GET() {
       },
     })
   }
+
+  await mergeAnonymousCartIntoUserCart(user.id)
+
   return NextResponse.redirect(process.env.KINDE_SITE_URL as string)
 }

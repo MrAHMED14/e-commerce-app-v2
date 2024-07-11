@@ -38,7 +38,6 @@ export default function SortOptions() {
   )
 
   const [isPending, startTransition] = useTransition()
-  console.log({ filter })
 
   return (
     <div className="flex items-center">

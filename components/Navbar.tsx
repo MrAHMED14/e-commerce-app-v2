@@ -20,14 +20,17 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Image from "next/image"
 import { LogOut, UserCircle2Icon } from "lucide-react"
+import { getCart } from "@/lib/cart"
 
 const Navbar = async () => {
   const { getUser } = getKindeServerSession()
   const user = await getUser()
+  const cart = await getCart()
+
   return (
     <div className="sm:container w-full flex items-center justify-between">
       <div className="w-full hidden md:flex">
-        <MenuItems />
+        <MenuItems cartSize={cart?.size} />
       </div>
       <Suspense>
         <SearchInput />

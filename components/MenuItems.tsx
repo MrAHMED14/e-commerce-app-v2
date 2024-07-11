@@ -1,7 +1,11 @@
 import { Box, Home, ShoppingBag, ShoppingBasket } from "lucide-react"
 import Link from "next/link"
 
-export default function MenuItems() {
+export default function MenuItems({
+  cartSize,
+}: {
+  cartSize: number | undefined
+}) {
   return (
     <>
       <ul className="flex items-center gap-10">
@@ -20,7 +24,7 @@ export default function MenuItems() {
         <li className="flex items-center gap-1">
           <ShoppingBasket size={18} />
           <Link href={"/shop/cart"} className="hover:underline">
-            Cart
+            Cart ({cartSize ? cartSize : 0})
           </Link>
         </li>
         <li className="flex items-center gap-1">
