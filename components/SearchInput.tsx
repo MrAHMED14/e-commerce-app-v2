@@ -27,9 +27,14 @@ const SearchInput = () => {
   const router = useRouter()
   const searchParams = useSearchParams()!
 
+  const page = searchParams.get("page")
+
   const createQueryString = useCallback(
     (name: string, value: string) => {
       const params = new URLSearchParams(searchParams)
+      if (page && page !== "1") {
+        params.delete("page")
+      }
       if (!value.length) {
         params.delete(name)
       } else {
@@ -37,7 +42,7 @@ const SearchInput = () => {
       }
       return params.toString()
     },
-    [searchParams]
+    [searchParams, page]
   )
 
   const form = useForm<z.infer<typeof FormSchema>>({

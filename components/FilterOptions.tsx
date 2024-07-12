@@ -23,6 +23,7 @@ const subCategories = [
 export default function Filtre() {
   const router = useRouter()
   const searchParams = useSearchParams()!
+  const page = searchParams.get("page")
 
   const [isCatPending, startCatTransition] = useTransition()
   const [isSubCatPending, startSubCatTransition] = useTransition()
@@ -39,6 +40,13 @@ export default function Filtre() {
   const createQueryString = useCallback(
     (name: string, value: string) => {
       const params = new URLSearchParams(searchParams)
+      if (
+        (name === "category" || name === "subCategory") &&
+        page &&
+        page !== "1"
+      ) {
+        params.delete("page")
+      }
       if (!value.length) {
         params.delete(name)
       } else {
@@ -46,7 +54,7 @@ export default function Filtre() {
       }
       return params.toString()
     },
-    [searchParams]
+    [searchParams, page]
   )
 
   return (

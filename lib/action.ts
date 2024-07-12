@@ -52,6 +52,15 @@ export interface ProductFilterValues {
         value: Prisma.SortOrder | undefined
       }
     | undefined
+
+  pagination?:
+    | {
+        currentPage: number
+        totalPages: number
+        skip: number
+        take: number
+      }
+    | undefined
 }
 
 export async function createOrder(orderRequest: OrderRequest) {
@@ -162,8 +171,53 @@ export async function getProCatAndSubCatById(id: string) {
   }
 }
 
+export async function countProducts(filterValues: ProductFilterValues) {
+  const { query, category, subCategory, selectedOrder, price, pagination } =
+    filterValues
+
+  const searchString = query
+    ?.replace(/&/g, "")
+    .replace(/\|/g, "")
+    .replace(/'/g, "")
+    .split(" ")
+    .filter((word) => word.length > 0)
+    .join(" & ")
+
+  const searchFilter: Prisma.ProductWhereInput = searchString
+    ? {
+        OR: [
+          { title: { search: searchString } },
+          { description: { search: searchString } },
+          { subcategory: { name: { search: searchString } } },
+          { subcategory: { mainCategory: { name: { search: searchString } } } },
+        ],
+      }
+    : {}
+
+  const where: Prisma.ProductWhereInput = {
+    AND: [
+      searchFilter,
+
+      subCategory && subCategory.length > 0
+        ? { subcategory: { name: subCategory } }
+        : {},
+
+      category && category.length > 0
+        ? { subcategory: { mainCategory: { name: category } } }
+        : {},
+
+      price ? { price } : {},
+    ],
+  }
+  const totalItemCount = await prisma.product.count({
+    where,
+  })
+  return totalItemCount
+}
+
 export async function getAllProducts2(filterValues: ProductFilterValues) {
-  const { query, category, subCategory, selectedOrder, price } = filterValues
+  const { query, category, subCategory, selectedOrder, price, pagination } =
+    filterValues
   //Problem price: min > max
 
   const searchString = query
@@ -212,6 +266,8 @@ export async function getAllProducts2(filterValues: ProductFilterValues) {
   const products = await prisma.product.findMany({
     where,
     orderBy,
+    skip: pagination?.skip,
+    take: pagination?.take,
   })
   return products
 }

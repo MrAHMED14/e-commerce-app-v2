@@ -1,11 +1,11 @@
-import Products from "@/components/ProductsList"
 import Filtre from "@/components/FilterOptions"
-import { ProductFilterValues } from "@/lib/action"
+import Products from "@/components/ProductsList"
+import SortOptions from "@/components/SortOptions"
+import { countProducts, ProductFilterValues } from "@/lib/action"
 import { Prisma } from "@prisma/client"
+import Link from "next/link"
 import { Suspense } from "react"
 import Loading from "../../../components/LoadingPro"
-import Link from "next/link"
-import SortOptions from "@/components/SortOptions"
 
 export const dynamic = "force-dynamic"
 
@@ -49,12 +49,32 @@ export default async function ShopPage({
         : undefined,
   }
 
-  const filter: ProductFilterValues = {
+  let filter: ProductFilterValues = {
     query: search,
     category,
     subCategory,
     selectedOrder,
     price,
+  }
+  const page = typeof searchParams.page === "string" ? searchParams.page : "1"
+
+  const currentPage = parseInt(page)
+
+  const pageSize = 20 as const
+  const totalItemCount = await countProducts(filter)
+
+  const totalPages = Math.ceil(totalItemCount / pageSize)
+
+  const pagination = {
+    currentPage,
+    totalPages,
+    skip: (currentPage - 1) * pageSize,
+    take: pageSize,
+  }
+
+  filter = {
+    ...filter,
+    pagination,
   }
   return (
     <>
