@@ -18,8 +18,9 @@ const Products = async ({
               <ProCard key={product.id} product={product} />
             ))}
           </div>
-          {products.length &&
-            filter?.pagination &&
+          {products.length >= 1 &&
+            filter &&
+            filter.pagination &&
             filter.pagination.totalPages > 1 && (
               <ProPagination
                 currentPage={filter.pagination.currentPage}

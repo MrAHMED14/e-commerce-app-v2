@@ -18,10 +18,10 @@ const ProCard = ({ product }: { product: Product }) => {
 
           <div className="flex flex-col justify-end h-16">
             <span className="flex text-slate-400 text-sm font-bold line-through leading-none items-center">
-              {product.price + 26} $
+              {Math.ceil(product.price + 26)} $
             </span>
             <span className="block text-slate-950 text-xl font-bold pb-2 leading-none items-center mb-1">
-              {product.price} $
+              {Math.ceil(product.price)} $
             </span>
           </div>
         </div>

@@ -1,11 +1,11 @@
-import Filtre from "@/components/FilterOptions"
-import Products from "@/components/ProductsList"
-import SortOptions from "@/components/SortOptions"
 import { countProducts, ProductFilterValues } from "@/lib/action"
-import { Prisma } from "@prisma/client"
-import Link from "next/link"
 import { Suspense } from "react"
+import { Prisma } from "@prisma/client"
+import SortOptions from "@/components/SortOptions"
+import Products from "@/components/ProductsList"
 import Loading from "../../../components/LoadingPro"
+import Filter from "@/components/Filter"
+import Link from "next/link"
 
 export const dynamic = "force-dynamic"
 
@@ -56,12 +56,12 @@ export default async function ShopPage({
     selectedOrder,
     price,
   }
-  const page = typeof searchParams.page === "string" ? searchParams.page : "1"
+  const totalItemCount = await countProducts(filter)
 
+  const page = typeof searchParams.page === "string" ? searchParams.page : "1"
   const currentPage = parseInt(page)
 
   const pageSize = 20 as const
-  const totalItemCount = await countProducts(filter)
 
   const totalPages = Math.ceil(totalItemCount / pageSize)
 
@@ -91,16 +91,11 @@ export default async function ShopPage({
           </Suspense>
         </div>
         <div className="mx-4 flex gap-x-2 justify-center">
-          <div className="w-[240px] hidden lg:block">
-            <div className="border sticky top-1 w-full flex-col p-4 rounded-md">
-              <h1 className="font-bold text-lg">Filters</h1>
-              <Suspense>
-                <Filtre />
-              </Suspense>
-            </div>
-          </div>
+          <Filter />
           <Suspense
-            key={subCategory || category || search || sort || min || max}
+            key={
+              subCategory || category || search || sort || min || max || page
+            }
             fallback={<Loading />}
           >
             <Products filter={filter} />

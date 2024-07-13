@@ -21,6 +21,8 @@ const ITMES = [
   { title: "Pagination", status: true },
   { title: "Single page product", status: true },
   { title: "Fully functional cart component", status: true },
+
+  //** Next Task **
   { title: "Way to make an order", status: false },
   {
     title: "Way to create new product with img cloud service integration",

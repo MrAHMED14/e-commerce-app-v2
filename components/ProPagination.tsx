@@ -1,4 +1,5 @@
 "use client"
+
 import {
   Pagination,
   PaginationContent,
@@ -21,12 +22,14 @@ export default function ProPagination({
 }: PaginationBarProps) {
   const maxPage = Math.min(totalPages, Math.max(currentPage + 4, 10))
   const minPage = Math.max(1, Math.min(currentPage - 5, maxPage - 9))
+
+  const [isPending, startTransition] = useTransition()
   const searchParams = useSearchParams()
   const router = useRouter()
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams)
+      const params = new URLSearchParams(searchParams.toString())
       if (!value.length) {
         params.delete(name)
       } else {
@@ -37,15 +40,29 @@ export default function ProPagination({
     [searchParams]
   )
 
+  const updateRoute = useCallback(
+    (queryString: string) => {
+      startTransition(() => {
+        router.push(`/shop?${queryString}`, { scroll: true })
+      })
+    },
+    [router]
+  )
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      updateRoute(createQueryString("page", page.toString()))
+    },
+    [createQueryString, updateRoute]
+  )
+
   const numberedPageItems: JSX.Element[] = []
 
   for (let page = minPage; page <= maxPage; page++) {
     numberedPageItems.push(
       <PaginationItem key={page}>
         <span
-          onClick={() => {
-            router.push(`/shop?${createQueryString("page", page.toString())}`)
-          }}
+          onClick={() => handlePageChange(page)}
           className={cn(
             buttonVariants({
               variant: currentPage === page ? "outline" : "ghost",
@@ -58,25 +75,17 @@ export default function ProPagination({
       </PaginationItem>
     )
   }
+
   return (
-    <div>
+    <div className="flex flex-col gap-y-2 items-center">
       <Pagination>
         <PaginationContent>
           {currentPage > 1 && (
             <PaginationItem>
               <span
-                onClick={() => {
-                  router.push(
-                    `/shop?${createQueryString(
-                      "page",
-                      (currentPage - 1).toString()
-                    )}`
-                  )
-                }}
+                onClick={() => handlePageChange(currentPage - 1)}
                 className={cn(
-                  buttonVariants({
-                    variant: "ghost",
-                  }),
+                  buttonVariants({ variant: "ghost" }),
                   "flex items-center gap-2 cursor-pointer"
                 )}
               >
@@ -91,18 +100,9 @@ export default function ProPagination({
           {currentPage < totalPages && (
             <PaginationItem>
               <span
-                onClick={() => {
-                  router.push(
-                    `/shop?${createQueryString(
-                      "page",
-                      (currentPage + 1).toString()
-                    )}`
-                  )
-                }}
+                onClick={() => handlePageChange(currentPage + 1)}
                 className={cn(
-                  buttonVariants({
-                    variant: "ghost",
-                  }),
+                  buttonVariants({ variant: "ghost" }),
                   "flex items-center gap-2 cursor-pointer"
                 )}
               >
@@ -113,6 +113,19 @@ export default function ProPagination({
           )}
         </PaginationContent>
       </Pagination>
+      <div
+        className={cn(
+          buttonVariants({ variant: "outline" }),
+          "hidden",
+          isPending && "block"
+        )}
+      >
+        {isPending && (
+          <span className="flex items-center gap-2">
+            Loading <Loader2 className="h-4 w-4 animate-spin" />
+          </span>
+        )}
+      </div>
     </div>
   )
 }

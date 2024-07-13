@@ -1,32 +1,29 @@
 "use client"
+
 import { incrementProductQuantity } from "@/lib/action"
 import { Loader2 } from "lucide-react"
-import { useState, useTransition } from "react"
+import { useTransition } from "react"
+import toast from "react-hot-toast"
 
-interface ProInfoProps {
+interface AddToCartProps {
   productId: string
 }
 
-export default function AddToCart({ productId }: ProInfoProps) {
+export default function AddToCart({ productId }: AddToCartProps) {
   const [isPending, startTransition] = useTransition()
-  const [success, setSuccess] = useState(false)
+
+  const handleAddToCart = () => {
+    startTransition(async () => {
+      await incrementProductQuantity(productId)
+      toast.success("Added to Cart.")
+    })
+  }
 
   return (
     <div className="flex flex-col w-fit">
-      {!isPending && success && (
-        <span className="text-green-500 font-semibold mt-2">
-          Added to Cart.
-        </span>
-      )}
       <button
         disabled={isPending}
-        onClick={() => {
-          setSuccess(false)
-          startTransition(async () => {
-            await incrementProductQuantity(productId)
-            setSuccess(true)
-          })
-        }}
+        onClick={handleAddToCart}
         className="dark:bg-gray-100 dark:text-stone-950 bg-stone-950 text-gray-100 py-2 px-5 rounded mt-1 font-semibold"
       >
         <span className="flex gap-2 items-center">

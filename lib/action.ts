@@ -1,8 +1,8 @@
 "use server"
 import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import { createCart, getCart, prismaDynamicQuery } from "./cart"
 import prisma from "./db"
-import { createCart, getCart } from "./cart"
 
 interface OrderItem {
   productId: string
@@ -12,28 +12,6 @@ interface OrderItem {
 interface OrderRequest {
   userId: string
   order: OrderItem[]
-}
-
-export async function incrementProductQuantity(productId: string) {
-  const cart = (await getCart()) ?? (await createCart())
-
-  const articleInCart = cart.items.find((item) => item.productId === productId)
-
-  if (articleInCart) {
-    await prisma.cartItem.update({
-      where: { id: articleInCart.id },
-      data: { quantity: { increment: 1 } },
-    })
-  } else {
-    await prisma.cartItem.create({
-      data: {
-        cartId: cart.id,
-        productId,
-        quantity: 1,
-      },
-    })
-  }
-  revalidatePath("/shop/[id]", "page")
 }
 
 export interface ProductFilterValues {
@@ -61,6 +39,28 @@ export interface ProductFilterValues {
         take: number
       }
     | undefined
+}
+
+export async function incrementProductQuantity(productId: string) {
+  const cart = (await getCart()) ?? (await createCart())
+
+  const articleInCart = cart.items.find((item) => item.productId === productId)
+
+  if (articleInCart) {
+    await prisma.cartItem.update({
+      where: { id: articleInCart.id },
+      data: { quantity: { increment: 1 } },
+    })
+  } else {
+    await prisma.cartItem.create({
+      data: {
+        cartId: cart.id,
+        productId,
+        quantity: 1,
+      },
+    })
+  }
+  revalidatePath("/shop/[id]", "page")
 }
 
 export async function createOrder(orderRequest: OrderRequest) {
@@ -123,31 +123,6 @@ export async function getAllOrders() {
   }
 }
 
-export async function getAllCategory() {
-  try {
-    const category = await prisma.mainCategory.findMany({})
-
-    return category
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-export async function getAllSubCategory(category?: string | undefined) {
-  try {
-    const where: Prisma.SubcategoryWhereInput | undefined = category
-      ? {
-          mainCategory: { name: category },
-        }
-      : {}
-    const subCategory = await prisma.subcategory.findMany({ where })
-
-    return subCategory
-  } catch (error) {
-    console.error(error)
-  }
-}
-
 export async function getProductById(id: string) {
   try {
     const productById = await prisma.product.findUnique({ where: { id } })
@@ -158,57 +133,26 @@ export async function getProductById(id: string) {
   }
 }
 
-export async function getProCatAndSubCatById(id: string) {
+export async function getCategoryAndSubcategoryById(id: string) {
   try {
     const categoryById = await prisma.subcategory.findUnique({
       where: { id },
       include: { mainCategory: true },
     })
+    if (!categoryById) return null
 
-    return categoryById
+    return {
+      category: categoryById.mainCategory.name,
+      subCategory: categoryById.name,
+    }
   } catch (error) {
     console.error(error)
   }
 }
 
 export async function countProducts(filterValues: ProductFilterValues) {
-  const { query, category, subCategory, selectedOrder, price, pagination } =
-    filterValues
+  const { where } = prismaDynamicQuery(filterValues)
 
-  const searchString = query
-    ?.replace(/&/g, "")
-    .replace(/\|/g, "")
-    .replace(/'/g, "")
-    .split(" ")
-    .filter((word) => word.length > 0)
-    .join(" & ")
-
-  const searchFilter: Prisma.ProductWhereInput = searchString
-    ? {
-        OR: [
-          { title: { search: searchString } },
-          { description: { search: searchString } },
-          { subcategory: { name: { search: searchString } } },
-          { subcategory: { mainCategory: { name: { search: searchString } } } },
-        ],
-      }
-    : {}
-
-  const where: Prisma.ProductWhereInput = {
-    AND: [
-      searchFilter,
-
-      subCategory && subCategory.length > 0
-        ? { subcategory: { name: subCategory } }
-        : {},
-
-      category && category.length > 0
-        ? { subcategory: { mainCategory: { name: category } } }
-        : {},
-
-      price ? { price } : {},
-    ],
-  }
   const totalItemCount = await prisma.product.count({
     where,
   })
@@ -216,52 +160,7 @@ export async function countProducts(filterValues: ProductFilterValues) {
 }
 
 export async function getAllProducts2(filterValues: ProductFilterValues) {
-  const { query, category, subCategory, selectedOrder, price, pagination } =
-    filterValues
-  //Problem price: min > max
-
-  const searchString = query
-    ?.replace(/&/g, "")
-    .replace(/\|/g, "")
-    .replace(/'/g, "")
-    .split(" ")
-    .filter((word) => word.length > 0)
-    .join(" & ")
-
-  const searchFilter: Prisma.ProductWhereInput = searchString
-    ? {
-        OR: [
-          { title: { search: searchString } },
-          { description: { search: searchString } },
-          { subcategory: { name: { search: searchString } } },
-          { subcategory: { mainCategory: { name: { search: searchString } } } },
-        ],
-      }
-    : {}
-
-  const where: Prisma.ProductWhereInput = {
-    AND: [
-      searchFilter,
-
-      subCategory && subCategory.length > 0
-        ? { subcategory: { name: subCategory } }
-        : {},
-
-      category && category.length > 0
-        ? { subcategory: { mainCategory: { name: category } } }
-        : {},
-
-      price ? { price } : {},
-    ],
-  }
-
-  let orderBy:
-    | Prisma.ProductOrderByWithRelationInput
-    | Prisma.ProductOrderByWithRelationInput[]
-    | undefined = {}
-  if (selectedOrder?.name === "price") {
-    orderBy = { price: selectedOrder.value }
-  }
+  const { where, orderBy, pagination } = prismaDynamicQuery(filterValues)
 
   const products = await prisma.product.findMany({
     where,

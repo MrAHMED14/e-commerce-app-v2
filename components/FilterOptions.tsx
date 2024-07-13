@@ -2,17 +2,27 @@
 
 import { Loader2 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useTransition } from "react"
+import React, {
+  useCallback,
+  useTransition,
+  useMemo,
+  useState,
+  ChangeEvent,
+} from "react"
 import { Input } from "./ui/input"
 import Select from "./ui/select"
 import { Button } from "./ui/button"
 
-const categories = [
+type Category = { name: string }
+type SubCategory = { name: string }
+
+const categories: Category[] = [
   { name: "Electronics" },
   { name: "Books" },
   { name: "Fashion" },
 ]
-const subCategories = [
+
+const subCategories: SubCategory[] = [
   { name: "Smartphones" },
   { name: "Fiction" },
   { name: "Non-Fiction" },
@@ -22,28 +32,32 @@ const subCategories = [
 
 export default function Filtre() {
   const router = useRouter()
-  const searchParams = useSearchParams()!
-  const page = searchParams.get("page")
+  const searchParams = useSearchParams()
+  const [isPending, startTransition] = useTransition()
 
-  const [isCatPending, startCatTransition] = useTransition()
-  const [isSubCatPending, startSubCatTransition] = useTransition()
-  const [isAvailPending, startAvailTransition] = useTransition()
-  const [isMinPending, startMinTransition] = useTransition()
-  const [isMaxPending, startMaxTransition] = useTransition()
-
-  const currentCategory = searchParams.get("category") as string
-  const currentAvailable = searchParams.get("available") as string
-  const currentSubCategory = searchParams.get("subCategory") as string
-  const currentMaxPrice = searchParams.get("max") as string
-  const currentMinPrice = searchParams.get("min") as string
+  const [category, setCategory] = useState<string>(
+    searchParams.get("category") || ""
+  )
+  const [subCategory, setSubCategory] = useState<string>(
+    searchParams.get("subCategory") || ""
+  )
+  const [available, setAvailable] = useState<boolean>(
+    searchParams.get("available") === "true"
+  )
+  const [minPrice, setMinPrice] = useState<string>(
+    searchParams.get("min") || ""
+  )
+  const [maxPrice, setMaxPrice] = useState<string>(
+    searchParams.get("max") || ""
+  )
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
       const params = new URLSearchParams(searchParams)
       if (
-        (name === "category" || name === "subCategory") &&
-        page &&
-        page !== "1"
+        ["category", "subCategory"].includes(name) &&
+        params.get("page") &&
+        params.get("page") !== "1"
       ) {
         params.delete("page")
       }
@@ -54,159 +68,175 @@ export default function Filtre() {
       }
       return params.toString()
     },
-    [searchParams, page]
+    [searchParams]
   )
 
+  const updateRoute = useCallback(
+    (queryString: string) => {
+      startTransition(() => {
+        router.push(`/shop?${queryString}`, { scroll: false })
+      })
+    },
+    [router]
+  )
+
+  const handleCategoryChange = useCallback(
+    (e: ChangeEvent<HTMLSelectElement>) => {
+      const value = e.target.value
+      setCategory(value)
+      updateRoute(createQueryString("category", value))
+    },
+    [createQueryString, updateRoute]
+  )
+
+  const handleSubCategoryChange = useCallback(
+    (e: ChangeEvent<HTMLSelectElement>) => {
+      const value = e.target.value
+      setSubCategory(value)
+      updateRoute(createQueryString("subCategory", value))
+    },
+    [createQueryString, updateRoute]
+  )
+
+  const handleAvailabilityChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const checked = e.target.checked
+      setAvailable(checked)
+      updateRoute(createQueryString("available", checked ? "true" : ""))
+    },
+    [createQueryString, updateRoute]
+  )
+
+  const debouncedPriceChange = useCallback(
+    (type: string, value: string) => {
+      if (parseInt(value) >= 0 || value === "") {
+        updateRoute(createQueryString(type, value))
+      }
+    },
+    [createQueryString, updateRoute]
+  )
+
+  const handleMinPriceChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value
+      setMinPrice(value)
+      debouncedPriceChange("min", value)
+    },
+    [debouncedPriceChange]
+  )
+
+  const handleMaxPriceChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value
+      setMaxPrice(value)
+      debouncedPriceChange("max", value)
+    },
+    [debouncedPriceChange]
+  )
+
+  const memoizedCategories = useMemo(
+    () =>
+      categories.map((category) => (
+        <option key={category.name} value={category.name}>
+          {category.name}
+        </option>
+      )),
+    []
+  )
+
+  const memoizedSubCategories = useMemo(
+    () =>
+      subCategories.map((subCategory) => (
+        <option key={subCategory.name} value={subCategory.name}>
+          {subCategory.name}
+        </option>
+      )),
+    []
+  )
+
+  const search = searchParams.get("search") || ""
+  const handleReset = () => {
+    setCategory("")
+    setSubCategory("")
+    setAvailable(false)
+    setMinPrice("")
+    setMaxPrice("")
+    startTransition(() => {
+      router.push(
+        `/shop${search && search.length > 1 ? "?search=" + search : ""}`,
+        { scroll: false }
+      )
+    })
+  }
+
   return (
-    <>
-      <div className="mt-2 flex flex-col gap-2 w-full">
-        <Select
-          disabled={isCatPending}
-          defaultValue={currentCategory}
-          onChange={(e) => {
-            startCatTransition(() => {
-              router.push(
-                `/shop?${createQueryString("category", e.currentTarget.value)}`,
-                {
-                  scroll: false,
-                }
-              )
-            })
-          }}
-        >
-          <option value="">All Category</option>
-          {categories.map((category) => (
-            <option className="py-5" key={category.name} value={category.name}>
-              {category.name}
-            </option>
-          ))}
-        </Select>
+    <div className="mt-2 flex flex-col gap-2 w-full">
+      <Select
+        disabled={isPending}
+        value={category}
+        onChange={handleCategoryChange}
+      >
+        <option value="">Categories</option>
+        {memoizedCategories}
+      </Select>
 
-        <Select
-          disabled={isSubCatPending}
-          defaultValue={currentSubCategory}
-          onChange={(e) => {
-            startSubCatTransition(() => {
-              router.push(
-                `/shop?${createQueryString(
-                  "subCategory",
-                  e.currentTarget.value
-                )}`,
-                {
-                  scroll: false,
-                }
-              )
-            })
-          }}
-        >
-          <option value="">All Sub Category</option>
-          {subCategories.map((subCategory) => (
-            <option key={subCategory.name} value={subCategory.name}>
-              {subCategory.name}
-            </option>
-          ))}
-        </Select>
+      <Select
+        disabled={isPending}
+        value={subCategory}
+        onChange={handleSubCategoryChange}
+      >
+        <option value="">Sub-categories</option>
+        {memoizedSubCategories}
+      </Select>
 
-        <div className="flex gap-2">
-          <input
-            type="checkbox"
-            className="accent-white"
-            name="available"
-            id="available"
-            defaultChecked={currentAvailable === "true" ? true : false}
-            onChange={(e) => {
-              startAvailTransition(() => {
-                const checked = e.currentTarget.checked === true ? "true" : ""
-                router.push(
-                  `/shop?${createQueryString("available", checked)}`,
-                  {
-                    scroll: false,
-                  }
-                )
-              })
-            }}
-          />
-          <label htmlFor="available">
-            <span className="flex items-center gap-2">
-              Available
-              {isAvailPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            </span>
-          </label>
-        </div>
-
-        <div className="">
-          <label htmlFor="">
-            <span className="flex items-center gap-2">
-              Price
-              {(isMaxPending || isMinPending) && (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              )}
-            </span>
-          </label>
-          <div className="flex gap-3">
-            <Input
-              defaultValue={currentMinPrice}
-              placeholder="min"
-              type="number"
-              onChange={(e) => {
-                ;(parseInt(e.currentTarget.value) >= 0 ||
-                  e.currentTarget.value === "") &&
-                  startMinTransition(() => {
-                    router.push(
-                      `/shop?${createQueryString(
-                        "min",
-                        e.currentTarget.value
-                      )}`,
-                      {
-                        scroll: false,
-                      }
-                    )
-                  })
-              }}
-            />
-
-            <Input
-              defaultValue={currentMaxPrice}
-              type="number"
-              className="appearance-none"
-              placeholder="max"
-              onChange={(e) => {
-                ;(parseInt(e.currentTarget.value) >= 0 ||
-                  e.currentTarget.value === "") &&
-                  startMaxTransition(() => {
-                    router.push(
-                      `/shop?${createQueryString(
-                        "max",
-                        e.currentTarget.value
-                      )}`,
-                      {
-                        scroll: false,
-                      }
-                    )
-                  })
-              }}
-            />
-          </div>
-        </div>
-
-        {/* <div className="">
-          <Button
-            className="w-full mt-2 font-semibold"
-            onClick={() => {
-              router.push(
-                `/shop?${
-                  searchParams.get("search")
-                    ? "search=" + searchParams.get("search")
-                    : ""
-                }`
-              )
-              router.refresh()
-            }}
-          >
-            Rest
-          </Button>
-        </div> */}
+      <div className="flex gap-2">
+        <input
+          type="checkbox"
+          className="accent-white"
+          name="available"
+          id="available"
+          checked={available}
+          onChange={handleAvailabilityChange}
+        />
+        <label htmlFor="available">
+          <span className="flex items-center gap-2">Available</span>
+        </label>
       </div>
-    </>
+
+      <div>
+        <label>
+          <span className="flex items-center gap-2">Price</span>
+        </label>
+        <div className="flex gap-3">
+          <Input
+            value={minPrice}
+            placeholder="min"
+            type="number"
+            onChange={handleMinPriceChange}
+          />
+          <Input
+            value={maxPrice}
+            type="number"
+            className="appearance-none"
+            placeholder="max"
+            onChange={handleMaxPriceChange}
+          />
+        </div>
+      </div>
+
+      <Button
+        disabled={isPending}
+        className="w-full mt-2 font-semibold"
+        onClick={handleReset}
+      >
+        {isPending ? (
+          <span className="flex items-center gap-2">
+            Loading <Loader2 className="h-4 w-4 animate-spin" />
+          </span>
+        ) : (
+          "Reset"
+        )}
+      </Button>
+    </div>
   )
 }

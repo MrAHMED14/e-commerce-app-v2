@@ -1,4 +1,4 @@
-import { getProCatAndSubCatById, getProductById } from "@/lib/action"
+import { getCategoryAndSubcategoryById, getProductById } from "@/lib/action"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import AddToCart from "@/components/AddToCart"
@@ -14,7 +14,7 @@ export default async function page({
     return notFound()
   }
 
-  const proCatAndSubCat = await getProCatAndSubCatById(
+  const path = await getCategoryAndSubcategoryById(
     product.subcategoryId as string
   )
 
@@ -24,7 +24,7 @@ export default async function page({
         <Link href="/" className="hover:underline">
           Home
         </Link>{" "}
-        / {proCatAndSubCat?.mainCategory.name} / {proCatAndSubCat?.name}
+        / {path?.category} / {path?.subCategory}
       </div>
       <div className="mt-14">
         <h1 className="text-4xl font-bold">{product?.title}</h1>

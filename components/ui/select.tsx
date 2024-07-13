@@ -17,11 +17,8 @@ export default forwardRef<
         disabled={disabled}
         {...props}
       />
-      {disabled ? (
-        <Loader2 className="absolute right-3 top-3 h-4 w-4 opacity-50 animate-spin" />
-      ) : (
-        <ChevronDown className="absolute right-3 top-3 h-4 w-4 opacity-50" />
-      )}
+
+      <ChevronDown className="absolute right-3 top-3 h-4 w-4 opacity-50" />
     </div>
   )
 })
