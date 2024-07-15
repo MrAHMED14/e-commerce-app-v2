@@ -154,7 +154,17 @@ export default function Filtre() {
     []
   )
 
+  let query = ""
   const search = searchParams.get("search") || ""
+  const page = searchParams.get("page") || ""
+
+  if (search.length > 0) {
+    query += `?search=${search}`
+  }
+  if (page.length > 0) {
+    query += (query.length > 0 ? "&" : "?") + `page=${page}`
+  }
+
   const handleReset = () => {
     setCategory("")
     setSubCategory("")
@@ -162,10 +172,7 @@ export default function Filtre() {
     setMinPrice("")
     setMaxPrice("")
     startTransition(() => {
-      router.push(
-        `/shop${search && search.length > 1 ? "?search=" + search : ""}`,
-        { scroll: false }
-      )
+      router.push(`/shop${query}`, { scroll: false })
     })
   }
 

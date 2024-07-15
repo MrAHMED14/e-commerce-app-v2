@@ -82,13 +82,15 @@ export default async function ShopPage({
         <Link href={"/"} className="hover:underline dark:text-rose-200">
           {"< Home"}
         </Link>
-        <div className="w-full flex items-center justify-between">
+        <div className="w-full flex items-center">
           <h1 className="text-2xl font-bold dark:text-rose-500 mb-2">
             Products
           </h1>
-          <Suspense>
-            <SortOptions />
-          </Suspense>
+          <div className="sm:container flex items-center justify-end">
+            <Suspense>
+              <SortOptions />
+            </Suspense>
+          </div>
         </div>
         <div className="mx-4 flex gap-x-2 justify-center">
           <Filter />

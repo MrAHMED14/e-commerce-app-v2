@@ -77,7 +77,7 @@ export default function ProPagination({
   }
 
   return (
-    <div className="flex flex-col gap-y-2 items-center">
+    <div className="flex flex-col gap-y-2 items-center my-10">
       <Pagination>
         <PaginationContent>
           {currentPage > 1 && (

@@ -1,8 +1,8 @@
 "use client"
 
 import { incrementProductQuantity } from "@/lib/action"
-import { Loader2 } from "lucide-react"
 import { useTransition } from "react"
+import { Loader2 } from "lucide-react"
 import toast from "react-hot-toast"
 
 interface AddToCartProps {

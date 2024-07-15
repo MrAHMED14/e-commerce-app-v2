@@ -1,32 +1,39 @@
-import CartItem from "@/components/CartItem"
-import ResetCart from "@/components/ResetCart"
+import { buttonVariants } from "@/components/ui/button"
 import { getCart } from "@/lib/cart"
+import ResetCart from "@/components/ResetCart"
+import CartItem from "@/components/CartItem"
 import Link from "next/link"
 
 export default async function page() {
   const cart = await getCart()
+
   return (
     <div className="container mt-10">
-      <h1 className="text-2xl">Cart</h1>
+      <h1 className="text-2xl font-bold dark:text-rose-500 mb-2">Cart</h1>
       <ul className="container">
         {cart?.items.map((cartItem) => (
-          <CartItem cartItem={cartItem} key={cartItem.id} />
+          <div className="" key={cartItem.id}>
+            <CartItem cartItem={cartItem} />
+            <div className="h-px w-1/3 bg-black dark:bg-white my-2" />
+          </div>
         ))}
       </ul>
-      {cart && (
+      {cart && cart.items.length > 0 && (
         <>
-          <div className="">
-            <p>subtotal: {cart.subtotal} $</p>
+          <div className="container">
+            <p className="text-lg font-semibold">
+              subtotal: {Math.round(cart.subtotal)} $
+            </p>
           </div>
-          <ResetCart cartId={cart.id} />
-          <div className="">
-            <Link className="hover:underline" href={"/checkout"}>
-              Checkout
-            </Link>
+          <div className="mb-2">
+            <ResetCart cartId={cart.id} />
           </div>
+          <Link className={buttonVariants({})} href={"/checkout"}>
+            Checkout
+          </Link>
         </>
       )}
-      {!cart?.items.length && <p>Your cart is empty.</p>}
+      {(cart?.items.length === 0 || !cart) && <p>Your cart is empty.</p>}
     </div>
   )
 }

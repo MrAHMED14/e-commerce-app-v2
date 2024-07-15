@@ -1,6 +1,6 @@
 import { getAllProducts2, ProductFilterValues } from "@/lib/action"
-import ProCard from "./ProCard"
 import ProPagination from "./ProPagination"
+import ProCard from "./ProCard"
 
 const Products = async ({
   filter,
@@ -13,7 +13,7 @@ const Products = async ({
     <div className="w-full flex flex-col mb-20">
       {products && (
         <>
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 min-[960px]:grid-cols-3 min-[1250px]:grid-cols-4 place-items-center">
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 min-[960px]:grid-cols-3 min-[1250px]:grid-cols-4 place-items-center gap-y-10">
             {products.map((product) => (
               <ProCard key={product.id} product={product} />
             ))}

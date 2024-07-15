@@ -1,28 +1,52 @@
 import { Product } from "@prisma/client"
+import { cn } from "@/lib/utils"
+import Image from "next/image"
 import Link from "next/link"
 
-const ProCard = ({ product }: { product: Product }) => {
+const ProCard = ({
+  product: { id, price, title, img },
+  className,
+}: {
+  product: Product
+  className?: string
+}) => {
   return (
     <Link
-      href={`/shop/${product.id}`}
-      className="cursor-pointer sm:hover:scale-90 sm:duration-500 scale-[.85] relative bg-slate-50 rounded-lg w-72 shadow-lg border"
+      href={`/shop/${id}`}
+      className={cn(
+        "flex flex-col items-center justify-center relative bg-gray-50 rounded-lg w-60 h-[300px] shadow-lg border sm:hover:scale-105 sm:duration-500",
+        className
+      )}
     >
-      <div className="relative pt-5 px-3 flex items-center justify-center">
-        <div className="w-52 h-48 bg-gray-300/80 rounded-lg animate-pulse" />
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="w-full h-full flex items-center justify-center pt-3">
+          {/* Image */}
+          <Image
+            src={"/001.webp"}
+            width={150}
+            height={150}
+            alt={`img`}
+            className="w-[160px] h-[160px] object-cover object-center rounded scale-[.97]"
+          />
+          {/* <div className="w-[160px] h-[160px] {w-[180px]} {h-40} bg-gray-300/80 rounded-lg animate-pulse" /> */}
+        </div>
       </div>
-      <div className="relative text-slate-800 px-6 pb-3 mt-6">
-        <div className="flex flex-col justify-between">
-          <p className="font-medium text-xl line-clamp-2 h-14">
-            {product.title}
-          </p>
+      <div className="w-full h-full">
+        <div className="w-full h-full flex flex-col items-center justify-center">
+          <div className="w-full h-full px-4 mt-3">
+            {/* Title */}
+            <h3 className="text-stone-950 font-medium text-lg line-clamp-2 h-fit">
+              {title}
+            </h3>
+          </div>
 
-          <div className="flex flex-col justify-end h-16">
-            <span className="flex text-slate-400 text-sm font-bold line-through leading-none items-center">
-              {Math.ceil(product.price + 26)} $
-            </span>
-            <span className="block text-slate-950 text-xl font-bold pb-2 leading-none items-center mb-1">
-              {Math.ceil(product.price)} $
-            </span>
+          <div className="w-full h-full flex flex-col justify-end px-4 pb-3 mt-2">
+            {/* Orginal price */}
+            <h3 className="text-slate-400 text-sm font-semibold line-through leading-none">
+              {Math.ceil(price + 260)} Da
+            </h3>
+            {/* Price after discount */}
+            <h3 className="text-slate-950 font-bold">{Math.ceil(price)} Da</h3>
           </div>
         </div>
       </div>

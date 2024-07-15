@@ -1,7 +1,7 @@
 "use client"
 
 import { resetCart } from "@/app/(pages)/shop/cart/actions"
-import { Loader2 } from "lucide-react"
+import { Delete, Loader2 } from "lucide-react"
 import { useTransition } from "react"
 
 export default function ResetCart({ cartId }: { cartId: string }) {
@@ -17,8 +17,13 @@ export default function ResetCart({ cartId }: { cartId: string }) {
       }}
       className="hover:underline mt-5"
     >
-      <span className="flex gap-2 items-center">
-        Reset Cart {isPending && <Loader2 className="animate-spin w-4 h-4" />}
+      <span className="flex gap-2 items-center hover:text-red-500">
+        Reset Cart{" "}
+        {isPending ? (
+          <Loader2 className="animate-spin w-4 h-4" />
+        ) : (
+          <Delete className="w-4 h-4" />
+        )}
       </span>
     </button>
   )
