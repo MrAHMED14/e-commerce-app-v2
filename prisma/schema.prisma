@@ -17,8 +17,21 @@ model User {
   avatar    String?
   createdAt DateTime @default(now())
 
+  orders    Order[]
+  carts     Cart[]
+  addresses Address[]
+}
+
+model Address {
+  id     String @id @default(uuid())
+  street String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
   orders Order[]
-  carts  Cart[]
+
+  @@index([userId])
 }
 
 model Order {
@@ -28,6 +41,9 @@ model Order {
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
+
+  addressId String
+  address   Address @relation(fields: [addressId], references: [id])
 
   items OrderItem[]
 

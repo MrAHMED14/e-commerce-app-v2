@@ -1,17 +1,21 @@
 "use server"
-import { Prisma } from "@prisma/client"
+import { createCart, getCart, prismaDynamicQuery, ShoppingCart } from "./cart"
 import { revalidatePath } from "next/cache"
-import { createCart, getCart, prismaDynamicQuery } from "./cart"
+import { Prisma } from "@prisma/client"
 import prisma from "./db"
 
-interface OrderItem {
-  productId: string
-  quantity: number
+export interface Address {
+  street: string
+  // city: string;
+  // state: string;
+  // postalCode: string;
+  // country: string;
 }
 
 interface OrderRequest {
   userId: string
-  order: OrderItem[]
+  order: ShoppingCart
+  address: Address
 }
 
 export interface ProductFilterValues {
@@ -65,9 +69,9 @@ export async function incrementProductQuantity(productId: string) {
 
 export async function createOrder(orderRequest: OrderRequest) {
   try {
-    const { userId, order } = orderRequest
+    const { userId, order, address } = orderRequest
 
-    // Fetch the user (optional validation step)
+    // Fetch the user (validation step)
     const user = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -78,27 +82,61 @@ export async function createOrder(orderRequest: OrderRequest) {
       throw new Error("User not found")
     }
 
-    // Create a new order
-    const newOrder = await prisma.order.create({
-      data: {
-        userId: user.id,
-        items: {
-          create: order.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-          })),
+    if (!order) {
+      throw new Error("Order not found")
+    }
+
+    if (!address) {
+      throw new Error("Address not found")
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Create the address
+      const addressRecord = await tx.address.create({
+        data: {
+          street: address.street,
+          userId: user.id,
         },
-      },
-      include: {
-        items: {
-          include: {
-            product: true,
+      })
+
+      // Create the order
+      await tx.order.create({
+        data: {
+          userId: user.id,
+          addressId: addressRecord.id,
+          items: {
+            create: order.items.map((item) => ({
+              productId: item.productId,
+              quantity: item.quantity,
+            })),
           },
         },
-      },
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      })
+
+      // Delete the cart
+      const cartId = order.id
+      await tx.cartItem.deleteMany({
+        where: {
+          cartId,
+        },
+      })
+
+      await tx.cart.delete({
+        where: {
+          id: cartId,
+        },
+      })
     })
 
-    return newOrder
+    revalidatePath("/checkout")
+    revalidatePath("/shop/cart")
   } catch (error) {
     console.error(error, "\nError creating order...")
   }
@@ -109,6 +147,7 @@ export async function getAllOrders() {
     const orders = await prisma.order.findMany({
       include: {
         user: true,
+        address: true,
         items: {
           include: {
             product: true,

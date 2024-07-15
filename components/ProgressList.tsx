@@ -21,9 +21,9 @@ const ITMES = [
   { title: "Pagination", status: true },
   { title: "Single page product", status: true },
   { title: "Fully functional cart component", status: true },
+  { title: "Way to make an order", status: true },
 
   //** Next Task **
-  { title: "Way to make an order", status: false },
   {
     title: "Way to create new product with img cloud service integration",
     status: false,
@@ -34,7 +34,6 @@ const ITMES = [
     status: false,
   },
   { title: "Make real project from this template", status: false },
-  //   { title: "", status: false },
 ]
 const Progress = () => {
   return (

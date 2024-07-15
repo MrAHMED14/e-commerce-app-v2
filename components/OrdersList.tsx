@@ -10,9 +10,12 @@ const Orders = async () => {
           orders.map((order) => (
             <div className="" key={order.id}>
               <div className="flex gap-4">
-                <h3>{order.id}</h3>
                 <h3>
-                  {order.user.firstName} {order.user.lastName}
+                  <span>
+                    {order.user.firstName} {order.user.lastName}
+                  </span>
+                  <br />
+                  <span>{order.address.street}</span>
                 </h3>
                 <div className="">
                   {order.items.map((item) => (
