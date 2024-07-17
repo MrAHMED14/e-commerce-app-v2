@@ -30,6 +30,13 @@ export default async function Home() {
         <Link href={"/ordres"} className="hover:underline dark:text-rose-200">
           Ordres (Protected)
         </Link>
+
+        <Link
+          href={"/add-product"}
+          className="hover:underline dark:text-rose-200"
+        >
+          Add product
+        </Link>
       </div>
       <h1 className="mt-10 text-2xl font-bold dark:text-rose-500">
         Products Log

@@ -23,11 +23,11 @@ const ITMES = [
   { title: "Fully functional cart component", status: true },
   { title: "Way to make an order", status: true },
 
-  //** Next Task **
   {
     title: "Way to create new product with img cloud service integration",
-    status: false,
+    status: true,
   },
+  //** Next Task **
   { title: "Display order in real time with notification", status: false },
   {
     title: "Corn job: Make a request to database server every 3 day",
