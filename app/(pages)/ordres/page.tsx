@@ -1,15 +1,14 @@
 import Orders from "@/components/OrdersList"
-import Link from "next/link"
+
 export const dynamic = "force-dynamic"
+
 export default function OrdersPage() {
   return (
-    <div className="sm:container mt-10">
-      <Link href={"/"} className="hover:underline dark:text-rose-200">
-        {"< Home"}
-      </Link>
-      <h1 className="text-2xl font-bold dark:text-rose-500 mb-2">Orders</h1>
-
-      <Orders />
+    <div className="container">
+      <section className="sm:container py-24">
+        <h1 className="pb-3 text-3xl font-bold">Orders</h1>
+        <Orders />
+      </section>
     </div>
   )
 }

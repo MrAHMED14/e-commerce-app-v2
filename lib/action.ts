@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache"
 import { Prisma } from "@prisma/client"
 import prisma from "./db"
 import { NextResponse } from "next/server"
+import toast from "react-hot-toast"
 
 export interface Address {
   street: string
@@ -238,6 +239,7 @@ export async function getAllOrders() {
           },
         },
       },
+      orderBy: { orderDate: "desc" },
     })
     revalidatePath("/ordres")
     return orders

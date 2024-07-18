@@ -63,7 +63,9 @@ export default function MakeOrder({ cartItems, userId }: MakeOrderProps) {
             name="street"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>address</FormLabel>
+                <FormLabel>
+                  address <span className="text-red-500">*</span>
+                </FormLabel>
                 <FormControl>
                   <Input placeholder="Your address here" {...field} />
                 </FormControl>

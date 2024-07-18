@@ -13,17 +13,16 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useActionState, useCallback, useTransition } from "react"
-import { useFormStatus } from "react-dom"
-import { useFormState } from "react-dom"
+import { cn } from "@/lib/utils"
 import { Loader2, Search } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useCallback, useTransition } from "react"
 
 const FormSchema = z.object({
   search: z.string(),
 })
 
-const SearchInput = () => {
+const SearchInput = ({ className }: { className?: string }) => {
   const router = useRouter()
   const searchParams = useSearchParams()!
 
@@ -63,7 +62,10 @@ const SearchInput = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="m-1 w-full items-center justify-center flex gap-2"
+        className={cn(
+          "m-1 w-full flex items-center justify-center gap-2",
+          className
+        )}
       >
         <FormField
           control={form.control}

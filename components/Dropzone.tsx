@@ -1,30 +1,27 @@
 "use client"
 
-import { createProduct, getSignature, saveToDatabase } from "@/lib/action"
-import { Loader2, Upload, X } from "lucide-react"
-import Image from "next/image"
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
-import { useDropzone } from "react-dropzone"
-import Select from "./ui/select"
-
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
-import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
+import { createProduct, getSignature, saveToDatabase } from "@/lib/action"
+import { Loader2, Upload, X } from "lucide-react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useDropzone } from "react-dropzone"
+import { useForm } from "react-hook-form"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { z } from "zod"
+import Select from "./ui/select"
 import toast from "react-hot-toast"
+import Image from "next/image"
 
-// Extend the File type to include preview
+type SubCategory = { name: string }
 type FileWithPreview = File & {
   preview: string
 }
@@ -34,7 +31,6 @@ interface FileRejected {
   errors: Error[]
 }
 
-type SubCategory = { name: string }
 const subCategories: SubCategory[] = [
   { name: "Smartphones" },
   { name: "Fiction" },
@@ -63,6 +59,7 @@ const formSchema = z.object({
 const Dropzone = ({ className }: { className: string }) => {
   const [files, setFiles] = useState<FileWithPreview[]>([])
   const [rejected, setRejected] = useState<FileRejected[]>([])
+  const [isPending, startTransition] = useTransition()
 
   const onDrop = useCallback((acceptedFiles: File[], fileRejections: any[]) => {
     if (acceptedFiles?.length) {
@@ -129,24 +126,6 @@ const Dropzone = ({ className }: { className: string }) => {
     return data
   }
 
-  const memoizedSubCategories = useMemo(
-    () =>
-      subCategories.map((subCategory) => (
-        <option key={subCategory.name} value={subCategory.name}>
-          {subCategory.name}
-        </option>
-      )),
-    []
-  )
-
-  const [inputValue, setInputValue] = useState<string>("")
-  const [isPending, startTransition] = useTransition()
-
-  const resetForm = () => {
-    setInputValue("")
-    removeAll()
-  }
-
   const handleUpload = async () => {
     const uploads = files.map((file) => uploadToCloudinary(file))
 
@@ -176,104 +155,138 @@ const Dropzone = ({ className }: { className: string }) => {
     return imgUrls
   }
 
-  const handleAddProduct = async (formData: FormData) => {
-    const title = formData.get("title") as string
-    const price = parseFloat(formData.get("price") as string)
-    const subCategory = formData.get("subCategory") as string
+  const memoizedSubCategories = useMemo(
+    () =>
+      subCategories.map((subCategory) => (
+        <option key={subCategory.name} value={subCategory.name}>
+          {subCategory.name}
+        </option>
+      )),
+    []
+  )
 
-    try {
-      formSchema.parse({ title, price, subCategory })
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      price: 0,
+      subCategory: "",
+    },
+  })
 
-      if (!files || files.length === 0) {
-        throw new Error("Add at least 1 image")
-      }
-      startTransition(async () => {
-        const imgUrls = await handleUpload()
-        if (!imgUrls || imgUrls.length === 0) {
-          throw new Error("Somthing went wrong, try again later")
-        }
-
-        await createProduct({ title, price, subCategory, imgUrls })
-        resetForm()
-        toast.success("Product Added!")
-      })
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        console.error(
-          "Validation error: ",
-          e.errors.map((e) => e.message)
-        )
-      } else if (e instanceof Error) {
-        console.error("Validation error: ", e.message)
-      } else {
-        console.error("Somthing went wrong, try again later")
-      }
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!files || files.length === 0) {
+      toast.error("Add at least 1 image")
+      return
     }
+    startTransition(async () => {
+      const imgUrls = await handleUpload()
+      if (!imgUrls || imgUrls.length === 0) {
+        toast.error("Somthing went wrong, try again later")
+        return
+      }
+
+      await createProduct({ ...values, imgUrls })
+      form.reset()
+      removeAll()
+      toast.success("Product Added!")
+    })
   }
 
   return (
-    <>
-      <form action={handleAddProduct}>
-        <div className="lg:w-1/3 md:w-1/2 space-y-2 mt-5">
-          <Input
-            //value={inputValue}
-            defaultValue=""
-            name="title"
-            type="text"
-            placeholder="title"
-          />
-          <Input
-            defaultValue=""
-            //value={inputValue}
-            name="price"
-            type="number"
-            placeholder="price"
-          />
-          <Select
-            //value={inputValue}
-            name="subCategory"
-          >
-            <option value="">Sub-categories</option>
-            {memoizedSubCategories}
-          </Select>
-        </div>
-        <div
-          {...getRootProps({
-            className,
-          })}
-        >
-          <input {...getInputProps({ name: "file" })} />
-          <div className="flex flex-col items-center justify-center gap-4">
-            <Upload className="h-5 w-5" />
-            {isDragActive ? (
-              <p>Drop the files here ...</p>
-            ) : (
-              <p>Drag & drop files here, or click to select files</p>
-            )}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        {/* Product Info */}
+        <section>
+          <h1 className="text-3xl font-bold">Product Info</h1>
+          <div className="lg:w-1/3 md:w-1/2 mt-5 space-y-3">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    title <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter product title here" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    price <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="number"
+                      onChange={(event) => field.onChange(+event.target.value)}
+                      placeholder="Enter product price here"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="subCategory"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    sub categories <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Select {...field}>
+                      <option value="">sub categories</option>
+                      {memoizedSubCategories}
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-        </div>
-        <section className="mt-10">
-          <div className="flex gap-4">
-            <h2 className="title text-3xl font-semibold">Preview</h2>
-            <button
+        </section>
+
+        {/* Upload Files */}
+        <section className="mt-20">
+          <h1 className="text-3xl font-bold">Upload Files</h1>
+          <div
+            {...getRootProps({
+              className,
+            })}
+          >
+            <input {...getInputProps({ name: "file" })} />
+            <div className="flex flex-col items-center justify-center gap-4">
+              <Upload className="h-5 w-5" />
+              {isDragActive ? (
+                <p>Drop the files here ...</p>
+              ) : (
+                <p>Drag & drop files here, or click to select files</p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Files Preview */}
+        <section className="mt-20">
+          <div className="flex justify-between items-center gap-4">
+            <h2 className="text-2xl font-semibold">Files Preview</h2>
+            <Button
               type="button"
               onClick={removeAll}
-              className="mt-1 rounded-md border border-rose-400 px-3 text-[12px] font-bold uppercase tracking-wider text-stone-500 transition-colors hover:bg-rose-400 hover:text-white"
+              className="mt-1 rounded-md sm:px-3 text-xs font-bold uppercase tracking-wider transition-colors hover:bg-rose-400 hover:text-white"
             >
               Remove all files
-            </button>
-            <button
-              type="submit"
-              className="ml-auto mt-1 rounded-md border border-purple-400 px-3 text-[12px] font-bold uppercase tracking-wider text-stone-500 transition-colors hover:bg-purple-400 hover:text-white"
-            >
-              {isPending ? (
-                <span className="flex items-center gap-3">
-                  Uploading... <Loader2 className="h-4 w-4 animate-spin" />
-                </span>
-              ) : (
-                "Upload to Cloudinary"
-              )}
-            </button>
+            </Button>
           </div>
           <h3 className="title mt-10 border-b pb-3 text-lg font-semibold text-stone-600">
             Accepted Files
@@ -296,10 +309,10 @@ const Dropzone = ({ className }: { className: string }) => {
                 />
                 <button
                   type="button"
-                  className="absolute -right-3 -top-3 flex h-7 w-7 items-center justify-center rounded-full border border-rose-400 bg-rose-400 transition-colors hover:bg-white"
+                  className="absolute -right-3 -top-3 flex h-7 w-7 items-center justify-center rounded-full bg-rose-400 transition-colors"
                   onClick={() => removeFile(file.name)}
                 >
-                  <X className="h-5 w-5 transition-colors hover:fill-rose-400" />
+                  <X className="h-5 w-5 transition-colors text-white" />
                 </button>
                 <p className="mt-2 text-[12px] font-medium text-stone-500">
                   {file.name}
@@ -334,8 +347,24 @@ const Dropzone = ({ className }: { className: string }) => {
             ))}
           </ul>
         </section>
+
+        {/* Submit Button */}
+        <div className="w-full mt-10 flex justify-center">
+          <Button
+            type="submit"
+            className="rounded-md px-10 font-bold uppercase tracking-wider transition-colors hover:bg-purple-400 hover:text-white"
+          >
+            {isPending ? (
+              <span className="flex items-center gap-3">
+                Uploading... <Loader2 className="h-4 w-4 animate-spin" />
+              </span>
+            ) : (
+              "Upload"
+            )}
+          </Button>
+        </div>
       </form>
-    </>
+    </Form>
   )
 }
 

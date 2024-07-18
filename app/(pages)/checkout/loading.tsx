@@ -1,10 +1,10 @@
-import Link from "next/link"
-
 export default function Loading() {
   return (
-    <div className="container mt-10">
-      <h1 className="text-2xl font-bold dark:text-rose-500 mb-2">Checkout</h1>
-      <p className="container mt-10">Loading...</p>
+    <div className="container">
+      <section className="sm:container py-24">
+        <h1 className="pb-3 text-3xl font-bold">Checkout</h1>
+        <p className="">Loading...</p>
+      </section>
     </div>
   )
 }

@@ -6,6 +6,7 @@ import Products from "@/components/ProductsList"
 import Loading from "../../../components/LoadingPro"
 import Filter from "@/components/Filter"
 import Link from "next/link"
+import { Loader2 } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -77,33 +78,31 @@ export default async function ShopPage({
     pagination,
   }
   return (
-    <>
-      <div className="sm:container sm:mx-auto mt-10">
-        <Link href={"/"} className="hover:underline dark:text-rose-200">
-          {"< Home"}
-        </Link>
-        <div className="w-full flex items-center">
-          <h1 className="text-2xl font-bold dark:text-rose-500 mb-2">
-            Products
-          </h1>
-          <div className="sm:container flex items-center justify-end">
-            <Suspense>
-              <SortOptions />
+    <div className="container">
+      <div className="sm:container py-24">
+        <section>
+          <div className="w-full flex justify-between items-center pb-3 mb-3">
+            <h1 className="text-3xl font-bold">Our Products</h1>
+
+            <div className="flex items-center justify-end">
+              <Suspense fallback={<Loader2 className="w-4 h-4 animate-spin" />}>
+                <SortOptions />
+              </Suspense>
+            </div>
+          </div>
+          <div className="flex gap-x-2 justify-center">
+            <Filter />
+            <Suspense
+              key={
+                subCategory || category || search || sort || min || max || page
+              }
+              fallback={<Loading />}
+            >
+              <Products filter={filter} />
             </Suspense>
           </div>
-        </div>
-        <div className="mx-4 flex gap-x-2 justify-center">
-          <Filter />
-          <Suspense
-            key={
-              subCategory || category || search || sort || min || max || page
-            }
-            fallback={<Loading />}
-          >
-            <Products filter={filter} />
-          </Suspense>
-        </div>
+        </section>
       </div>
-    </>
+    </div>
   )
 }

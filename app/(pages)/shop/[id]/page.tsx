@@ -19,20 +19,22 @@ export default async function page({
   )
 
   return (
-    <div className="container mt-10">
-      <div className="">
-        <Link href="/" className="hover:underline">
-          Home
-        </Link>{" "}
-        / {path?.category} / {path?.subCategory}
-      </div>
-      <div className="mt-14">
-        <h1 className="text-4xl font-bold">{product?.title}</h1>
-        <p className="">{product?.description}</p>
-        <p className="">{JSON.stringify(product?.img, null, 2)}</p>
-        <h4 className="text-xl mt-2">{product?.price} $</h4>
-      </div>
-      <AddToCart productId={product.id} />
+    <div className="container">
+      <section className="sm:container py-24">
+        <div className="">
+          <Link href="/" className="hover:underline">
+            Home
+          </Link>{" "}
+          / {path?.category} / {path?.subCategory}
+        </div>
+        <div className="mt-14">
+          <h1 className="text-4xl font-bold">{product?.title}</h1>
+          <p className="">{product?.description}</p>
+          <p className="">{JSON.stringify(product?.img, null, 2)}</p>
+          <h4 className="text-xl mt-2">{product?.price} $</h4>
+        </div>
+        <AddToCart productId={product.id} />
+      </section>
     </div>
   )
 }

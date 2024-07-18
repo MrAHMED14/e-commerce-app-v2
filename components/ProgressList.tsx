@@ -27,8 +27,9 @@ const ITMES = [
     title: "Way to create new product with img cloud service integration",
     status: true,
   },
+  { title: "Display order in real time without notification", status: true },
+  { title: "Responsive app", status: true },
   //** Next Task **
-  { title: "Display order in real time with notification", status: false },
   {
     title: "Corn job: Make a request to database server every 3 day",
     status: false,
