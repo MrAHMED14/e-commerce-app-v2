@@ -1,15 +1,25 @@
 "use client"
 
+// import {
+//  Pagination,
+//   PaginationContent,
+//   PaginationItem,
+// } from "@/components/ui/pagination"
+
 import {
   Pagination,
-  PaginationContent,
   PaginationItem,
-} from "@/components/ui/pagination"
+  PaginationCursor,
+  PaginationItemType,
+  PaginationItemRenderProps,
+} from "@nextui-org/pagination"
+
 import { cn } from "@/lib/utils"
 import { ChevronLeftIcon, ChevronRightIcon, Loader2 } from "lucide-react"
-import { buttonVariants } from "./ui/button"
+import { Button, buttonVariants } from "./ui/button"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useTransition } from "react"
+import { useCallback, useEffect, useState, useTransition } from "react"
+import Link from "next/link"
 
 interface PaginationBarProps {
   currentPage: number
@@ -20,9 +30,6 @@ export default function ProPagination({
   currentPage,
   totalPages,
 }: PaginationBarProps) {
-  const maxPage = Math.min(totalPages, Math.max(currentPage + 4, 10))
-  const minPage = Math.max(1, Math.min(currentPage - 5, maxPage - 9))
-
   const [isPending, startTransition] = useTransition()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -56,7 +63,19 @@ export default function ProPagination({
     [createQueryString, updateRoute]
   )
 
-  const numberedPageItems: JSX.Element[] = []
+  /*const numberedPageItems: JSX.Element[] = []
+
+  const maxPaginationNumber = true ? 5 : 9
+  const centerPosition = true ? 2 : 4
+
+  const maxPage = Math.min(
+    totalPages,
+    Math.max(currentPage + centerPosition, maxPaginationNumber)
+  )
+  const minPage = Math.max(
+    1,
+    Math.min(currentPage - centerPosition, maxPage - (maxPaginationNumber - 1))
+  )
 
   for (let page = minPage; page <= maxPage; page++) {
     numberedPageItems.push(
@@ -74,45 +93,81 @@ export default function ProPagination({
         </span>
       </PaginationItem>
     )
+  }*/
+
+  const renderItem = ({
+    ref,
+    key,
+    value,
+    isActive,
+    setPage,
+    className,
+  }: PaginationItemRenderProps) => {
+    if (value === PaginationItemType.DOTS) {
+      return (
+        <button key={key} className={className} disabled>
+          ...
+        </button>
+      )
+    }
+
+    // cursor is the default item
+    return (
+      <Button
+        ref={ref}
+        key={key}
+        variant={"ghost"}
+        className={cn(
+          className,
+          isActive && "dark:bg-muted bg-muted-foreground/20 rounded",
+          "dark:hover:bg-muted hover:bg-muted-foreground/20"
+        )}
+        onClick={() => setPage(value as number)}
+      >
+        {value}
+      </Button>
+    )
   }
 
   return (
     <div className="flex flex-col gap-y-2 items-center my-10">
-      <Pagination>
-        <PaginationContent>
-          {currentPage > 1 && (
-            <PaginationItem>
-              <span
-                onClick={() => handlePageChange(currentPage - 1)}
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "flex items-center gap-2 cursor-pointer"
-                )}
-              >
-                <ChevronLeftIcon className="h-4 w-4" />
-                <span>Previous</span>
-              </span>
-            </PaginationItem>
-          )}
+      <div className="flex items-center justify-center gap-x-4">
+        {currentPage > 1 && (
+          <span
+            onClick={() => handlePageChange(currentPage - 1)}
+            className={cn(
+              buttonVariants({ variant: "ghost" }),
+              "hidden sm:flex items-center justify-center gap-2 cursor-pointer dark:hover:bg-muted hover:bg-muted-foreground/20"
+            )}
+          >
+            <ChevronLeftIcon className="h-4 w-4" />
+            <span>Previous</span>
+          </span>
+        )}
+        <Pagination
+          disableCursorAnimation
+          total={totalPages}
+          page={currentPage}
+          initialPage={1}
+          className="gap-2 rounded"
+          radius="md"
+          renderItem={renderItem}
+          onChange={handlePageChange}
+        />
+        {currentPage < totalPages && (
+          <span
+            onClick={() => handlePageChange(currentPage + 1)}
+            className={cn(
+              buttonVariants({ variant: "ghost" }),
+              "hidden sm:flex items-center justify-center gap-2 cursor-pointer dark:hover:bg-muted hover:bg-muted-foreground/20"
+            )}
+          >
+            <span>Next</span>
+            <ChevronRightIcon className="h-4 w-4" />
+          </span>
+        )}
+      </div>
 
-          {numberedPageItems}
-
-          {currentPage < totalPages && (
-            <PaginationItem>
-              <span
-                onClick={() => handlePageChange(currentPage + 1)}
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "flex items-center gap-2 cursor-pointer"
-                )}
-              >
-                <span>Next</span>
-                <ChevronRightIcon className="h-4 w-4" />
-              </span>
-            </PaginationItem>
-          )}
-        </PaginationContent>
-      </Pagination>
       <div
         className={cn(
           buttonVariants({ variant: "outline" }),

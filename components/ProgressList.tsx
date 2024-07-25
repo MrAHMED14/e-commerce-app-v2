@@ -31,10 +31,9 @@ const ITMES = [
   { title: "Responsive app", status: true },
   //** Next Task **
   {
-    title: "Corn job: Make a request to database server every 3 day",
+    title: "Cron job: Make a request to database server every 3 day",
     status: false,
   },
-  { title: "Make real project from this template", status: false },
 ]
 const Progress = () => {
   return (

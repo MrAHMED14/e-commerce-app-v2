@@ -12,25 +12,17 @@ import React, {
 import { Input } from "./ui/input"
 import Select from "./ui/select"
 import { Button } from "./ui/button"
+import { MainCategory, Subcategory } from "@prisma/client"
 
-type Category = { name: string }
-type SubCategory = { name: string }
+interface FiltreOptionsProps {
+  categories?: MainCategory[]
+  subCategories?: Subcategory[]
+}
 
-const categories: Category[] = [
-  { name: "Electronics" },
-  { name: "Books" },
-  { name: "Fashion" },
-]
-
-const subCategories: SubCategory[] = [
-  { name: "Smartphones" },
-  { name: "Fiction" },
-  { name: "Non-Fiction" },
-  { name: "Laptops" },
-  { name: "Clothing" },
-]
-
-export default function Filtre() {
+export default function FiltreOptions({
+  categories,
+  subCategories,
+}: FiltreOptionsProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
@@ -136,22 +128,22 @@ export default function Filtre() {
 
   const memoizedCategories = useMemo(
     () =>
-      categories.map((category) => (
+      categories?.map((category) => (
         <option key={category.name} value={category.name}>
           {category.name}
         </option>
       )),
-    []
+    [categories]
   )
 
   const memoizedSubCategories = useMemo(
     () =>
-      subCategories.map((subCategory) => (
+      subCategories?.map((subCategory) => (
         <option key={subCategory.name} value={subCategory.name}>
           {subCategory.name}
         </option>
       )),
-    []
+    [subCategories]
   )
 
   let query = ""

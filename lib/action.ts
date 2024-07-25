@@ -2,7 +2,7 @@
 import { createCart, getCart, prismaDynamicQuery, ShoppingCart } from "./cart"
 import { v2 as cloudinary } from "cloudinary"
 import { revalidatePath } from "next/cache"
-import { Prisma } from "@prisma/client"
+import { MainCategory, Prisma, Subcategory } from "@prisma/client"
 import prisma from "./db"
 import { NextResponse } from "next/server"
 import toast from "react-hot-toast"
@@ -294,4 +294,32 @@ export async function getAllProducts2(filterValues: ProductFilterValues) {
     take: pagination?.take,
   })
   return products
+}
+
+export async function getCategories() {
+  try {
+    const categories = await prisma.mainCategory.findMany({})
+    if (!categories) return [] as MainCategory[]
+
+    return categories
+  } catch (error) {
+    console.error(error)
+  }
+}
+export async function getsubCategories(categoryName?: string) {
+  try {
+    const where: Prisma.SubcategoryWhereInput | undefined =
+      categoryName && categoryName.length > 0
+        ? {
+            mainCategory: { name: categoryName },
+          }
+        : {}
+    const subCategories = await prisma.subcategory.findMany({
+      where,
+    })
+    if (!subCategories) return
+    return subCategories
+  } catch (error) {
+    console.error(error)
+  }
 }

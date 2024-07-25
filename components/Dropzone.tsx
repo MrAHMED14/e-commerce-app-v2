@@ -18,8 +18,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { z } from "zod"
 import Select from "./ui/select"
-import toast from "react-hot-toast"
 import Image from "next/image"
+import { toast } from "sonner"
 
 type SubCategory = { name: string }
 type FileWithPreview = File & {

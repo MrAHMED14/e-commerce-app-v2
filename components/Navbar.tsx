@@ -58,7 +58,7 @@ const Navbar = async () => {
           </SheetContent>
         </Sheet>
       </div>
-      <div className="w-full flex items-center justify-end">
+      <div className="w-1/3 lg:w-full flex items-center justify-end">
         <div className="flex items-center gap-3">
           <Suspense fallback={<Loader2 className="h-4 w-4 animate-spin" />}>
             <SearchInput className="w-full hidden lg:flex" />

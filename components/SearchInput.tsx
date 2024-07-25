@@ -63,7 +63,7 @@ const SearchInput = ({ className }: { className?: string }) => {
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(
-          "m-1 w-full flex items-center justify-center gap-2",
+          "w-full flex flex-shrink grow items-center justify-center gap-0",
           className
         )}
       >
@@ -75,6 +75,7 @@ const SearchInput = ({ className }: { className?: string }) => {
               <FormControl>
                 <Input
                   disabled={isPending}
+                  className="w-full rounded-r-none rounded-l-full"
                   placeholder="Search for products ..."
                   {...field}
                 />
@@ -83,7 +84,11 @@ const SearchInput = ({ className }: { className?: string }) => {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isPending}>
+        <Button
+          type="submit"
+          disabled={isPending}
+          className="rounded-l-none rounded-r-full"
+        >
           {isPending ? (
             <Loader2 size={18} className="animate-spin" />
           ) : (

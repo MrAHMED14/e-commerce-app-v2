@@ -1,12 +1,26 @@
-import { countProducts, ProductFilterValues } from "@/lib/action"
-import { Suspense } from "react"
-import { Prisma } from "@prisma/client"
-import SortOptions from "@/components/SortOptions"
-import Products from "@/components/ProductsList"
-import Loading from "../../../components/LoadingPro"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import {
+  countProducts,
+  getCategories,
+  getsubCategories,
+  ProductFilterValues,
+} from "@/lib/action"
+
 import Filter from "@/components/Filter"
-import Link from "next/link"
+import FiltreOptions from "@/components/FilterOptions"
+import Products from "@/components/ProductsList"
+import SortOptions from "@/components/SortOptions"
+import { buttonVariants } from "@/components/ui/button"
+import { Prisma } from "@prisma/client"
 import { Loader2 } from "lucide-react"
+import { Suspense } from "react"
+import Loading from "../../../components/LoadingPro"
 
 export const dynamic = "force-dynamic"
 
@@ -77,21 +91,43 @@ export default async function ShopPage({
     ...filter,
     pagination,
   }
+
+  const categories = await getCategories()
+  const subCategories = await getsubCategories(category)
+
   return (
     <div className="container">
-      <div className="sm:container py-24">
+      <div className="py-24">
         <section>
-          <div className="w-full flex justify-between items-center pb-3 mb-3">
+          <div className="w-full block min-[410px]:flex min-[410px]:flex-row justify-between items-center pb-3 mb-3">
             <h1 className="text-3xl font-bold">Our Products</h1>
 
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-center max-[408px]:mt-8 gap-4">
               <Suspense fallback={<Loader2 className="w-4 h-4 animate-spin" />}>
                 <SortOptions />
               </Suspense>
+              <div className="flex lg:hidden">
+                <Sheet>
+                  <SheetTrigger>
+                    <span className={buttonVariants({})}>Filter</span>
+                  </SheetTrigger>
+                  <SheetContent side="bottom">
+                    <SheetHeader>
+                      <SheetTitle className="text-left">Filter</SheetTitle>
+                      <Suspense>
+                        <FiltreOptions
+                          categories={categories}
+                          subCategories={subCategories}
+                        />
+                      </Suspense>
+                    </SheetHeader>
+                  </SheetContent>
+                </Sheet>
+              </div>
             </div>
           </div>
           <div className="flex gap-x-2 justify-center">
-            <Filter />
+            <Filter categories={categories} subCategories={subCategories} />
             <Suspense
               key={
                 subCategory || category || search || sort || min || max || page

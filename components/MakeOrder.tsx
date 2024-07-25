@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 
-import toast from "react-hot-toast"
+import { toast } from "sonner"
 
 interface MakeOrderProps {
   userId: string
@@ -56,7 +56,7 @@ export default function MakeOrder({ cartItems, userId }: MakeOrderProps) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="w-1/3 space-y-8"
+          className="lg:w-1/3 md:w-1/2 mt-5 space-y-3"
         >
           <FormField
             control={form.control}
