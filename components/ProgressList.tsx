@@ -32,7 +32,7 @@ const ITMES = [
   //** Next Task **
   {
     title: "Cron job: Make a request to database server every 3 day",
-    status: false,
+    status: true,
   },
 ]
 const Progress = () => {
